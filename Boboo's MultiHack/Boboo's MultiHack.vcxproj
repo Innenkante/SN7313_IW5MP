@@ -86,7 +86,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BOBOOSMULTIHACK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BOBOOSMULTIHACK_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -145,12 +145,16 @@
     <Text Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\stdafx.h" />
-    <ClInclude Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\targetver.h" />
+    <ClInclude Include="Source\dllmain.h" />
+    <ClInclude Include="Source\Drawing.h" />
+    <ClInclude Include="Source\Offsets.h" />
+    <ClInclude Include="Source\stdafx.h" />
+    <ClInclude Include="Source\Structs.h" />
+    <ClInclude Include="Source\targetver.h" />
+    <ClInclude Include="Source\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\Boboo%27s MultiHack.cpp" />
-    <ClCompile Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\dllmain.cpp">
+    <ClCompile Include="Source\dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -164,7 +168,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\stdafx.cpp">
+    <ClCompile Include="Source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
