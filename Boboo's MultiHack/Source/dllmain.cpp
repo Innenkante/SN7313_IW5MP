@@ -8,19 +8,30 @@ bool FullBrightEnabled = false;
 bool LaserEnabled = false;
 bool RadarEnabled = false;
 bool MenuEnabled = true;
+bool GrabGuidEnabled = false;
 vec4_t ColorWhite = { 1.0f,1.0f,1.0f,1.0f };
 vec4_t ColorGreen = { 0.0f,  1.0f,  0.0f,  1.0f };
 vec4_t ColorRed = { 1.0f,  0.0f,  0.0f,  1.0f };
 vec4_t ColorBlue = { 0.0f,  0.0f,  1.0f,  1.0f };
-void* ConsoleFont;
+void* Font_Menu_GUID;
 
 
 
-tDrawEngineText DrawEngineText_ = (tDrawEngineText)DRAWENGINETEXTOFF;
-tRegisterFont RegisterFont_ = (tRegisterFont)REGISTERFONTOFF;
-tDrawEngineRadar DrawEngineRadar = (tDrawEngineRadar)DRAWENGINERADAROFF;
-R_RegisterShaderPtr RegisterShaderPtr_ = (R_RegisterShaderPtr)REGISTERSHADEROFF;
-tGetScreenMatrix GetScreenMatrix = (tGetScreenMatrix)SCREENMATRIXOFF;
+DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
+RegisterFont_t RegisterFont_ = (RegisterFont_t)REGISTERFONTOFF;
+DrawEngineRadar_t DrawEngineRadar_ = (DrawEngineRadar_t)DRAWENGINERADAROFF;
+OverlayPackage_t OverlayPackage_ = (OverlayPackage_t)0x0054BD70;
+OverlayEnemy_t OverlayEnemey_ = (OverlayEnemy_t)0x004CD2B0;
+OverlayFriendly_t OverlayFriendly_ = (OverlayFriendly_t)0x004370C0;
+//OverlayHeli_t OverlayHeli_ = (OverlayHeli_t)0x004C3FB0;
+//OverlayLocal_t OverlayLocal_ = (OverlayLocal_t)0x004FD740;
+//OverlayPlane_t OverlayPlane_ = (OverlayPlane_t)0x0052A6C0;
+//OverlayTurret_t OverlayTurret_ = (OverlayTurret_t)0x00561BF0;
+
+RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
+GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
+DrawNameTagsOverhead_t DrawNameTags_ = (DrawNameTagsOverhead_t)0x00588A10;
+
 
 
 
@@ -61,7 +72,7 @@ void* RegisterFont(char* font)
 
 int* RegisterShader(char* shader)
 {
-	return RegisterShaderPtr_(shader);
+	return RegisterShader_(shader);
 }
 
 void DrawTextMW3(float x, float y, void* pFont, float* color, const char *Text, ...)
@@ -100,11 +111,11 @@ void ChangeName()
 	BYTE* checkname = (BYTE*)PLAYERNAMECHECKBYTEOFF;
 	*checkname = 0xC3;
 	int random = rand() % 100;
-	std::ostringstream oss;
-	oss << "Player" << random;
-	std::string newName = oss.str();
-	std::string* Name = (std::string*)PLAYERNAMEOFF;
-	*Name = newName;
+	char* name = (char*)PLAYERNAMEOFF;
+	char newname[16];
+	sprintf(newname, "Player %d", random);
+	for (int i = 0; i < 16; i++)
+		name[i] = newname[i];
 }
 
 
@@ -219,8 +230,23 @@ char* GetServerIP()
 	return buf;
 }
 
+void DrawNameTags()
+{
+	CG_T* cg = (CG_T*)CGOFF;
+	Entity_T* Entity[18];
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(0x00A08630 + (i * 0x000001F8));
+		if (Entity[i]->Valid)
+			DrawNameTags_(cg->ClientNumber, *Entity[i], 1.0f);
+	}
+}
+
+
 void ChopperBoxes()
 {
+	DrawNameTags();
 	DWORD dwCall = 0x5AA470;
 	if (WhEnabled)
 	{
@@ -240,12 +266,12 @@ void DrawRadar()
 {
 	if (RadarEnabled)
 	{
-		RefDef_T* RefDef = (RefDef_T*)REFDEF;
+		RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 		CRadarHud radarhud;
 		int RadarW = 225;
 		int RadarH = RadarW;
 
-		int RadarX = RefDef->Width - 20 - RadarW;
+		int RadarX = RefDef->Width - RadarW;
 		int RadarY = 13;
 
 		radarhud.x = ScaleRadarX(RadarX);
@@ -253,11 +279,18 @@ void DrawRadar()
 		radarhud.w = ScaleRadarX(RadarW);
 		radarhud.h = ScaleRadarY(RadarH);
 
-		DrawEngineRadar(0, 0, 0, &radarhud, RegisterShader("black"), ColorBlue);
+		DrawEngineRadar_(0, 0, 0, &radarhud, RegisterShader("black"), ColorWhite);
+		OverlayPackage_(0, 0, 0, &radarhud, *RegisterShader("black"), ColorWhite);
+
+		//OverlayLocal_(0, 0, 0, &radarhud, ColorBlue);
+		OverlayEnemey_(0, 0, 0, &radarhud, ColorRed);
+		OverlayFriendly_(0, 0, 0, &radarhud, ColorGreen);
+
 	}
 	else
 		return;
 }
+
 
 void ForceJugg()
 {
@@ -284,9 +317,9 @@ void ChangeTeam()
 	if (LocalClient->Team == 0)
 		return;
 	if (LocalClient->Team == 1)
-		sprintf(buffer, "cmd mr %d 2 axis", MagicNum);
+		sprintf(buffer, "cmd mr %d 2 axis", *MagicNum);
 	if(LocalClient->Team == 2)
-		sprintf(buffer, "cmd mr %d 2 allies", MagicNum);
+		sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
 
 	SendCommandToConsole(buffer);
 }
@@ -298,10 +331,29 @@ void CallCrashVote()
 	SendCommandToConsole(buffer);
 }
 
+//TODO Fix the number scaling
+void GrabGUID()
+{
+	if (!GrabGuidEnabled)
+		return;
+	int fix = 0;
+	for (int i = 0; i < 18; i++)
+	{
+		int tmp = *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * i));
+		char tmp_buf[64];
+		if(i < 10)
+			sprintf_s(tmp_buf, " %d %d | %02d",fix, i, tmp);
+		sprintf_s(tmp_buf, "%d | %d", i, tmp);
+		DrawTextMW3(20, 200 + i * 20, Font_Menu_GUID, ColorGreen, tmp_buf);
+	}
+
+}
+
+
 
 void Menu()
 {
-	char buf[2048];
+	char buf[4096];
 	sprintf(buf, "^2Boboo's ^3MultiHack ^4beta!\n");
 	strncat(buf, "^5WallHack[F3]: ", sizeof(buf));
 	strncat(buf, GetBoolInChar(WhEnabled), sizeof(buf));
@@ -324,7 +376,14 @@ void Menu()
 	strncat(buf, "Unlock Classes[F9]", sizeof(buf));
 	strncat(buf, "\n^5", sizeof(buf));
 	strncat(buf, "Change Credentials[F10]", sizeof(buf));
-	strncat(buf, "\n", sizeof(buf));
+	strncat(buf, "\n^5", sizeof(buf));
+	strncat(buf, "ChangeTeam[F11]", sizeof(buf));
+	strncat(buf, "\n^5", sizeof(buf));
+	strncat(buf, "Force Juggernaut[F12]", sizeof(buf));
+	strncat(buf, "\n^5",sizeof(buf));
+	strncat(buf, "Crash Vote[END]", sizeof(buf));
+	strncat(buf, "\n^5", sizeof(buf));
+	strncat(buf, "Show player IDs[INSERT]", sizeof(buf));
 	strncat(buf, "\n^3", sizeof(buf));
 	//Other stuff:
 	strncat(buf, "Name: ^:", sizeof(buf));
@@ -342,7 +401,7 @@ void Menu()
 
 
 	if (MenuEnabled)
-		DrawTextMW3(550, 40, ConsoleFont, ColorWhite, buf);
+		DrawTextMW3(550, 40, Font_Menu_GUID, ColorWhite, buf);
 }
 
 //HOOK!////////////////////////////////////////////////////////////////////////////////////
@@ -364,7 +423,7 @@ void MakeJMP(BYTE *pAddress, DWORD dwJumpTo, DWORD dwLen)
 DWORD dwCall = HOOKCALL;
 DWORD dwReturn = HOOKRETURN;
 
-__declspec(naked) void uiShowList()
+__declspec(naked) void ShowMenu()
 {
 	__asm
 	{
@@ -373,6 +432,7 @@ __declspec(naked) void uiShowList()
 		PUSHFD;
 	}
 	Menu();
+	GrabGUID();
 	ChopperBoxes();
 	DrawRadar();
 	__asm
@@ -387,7 +447,7 @@ __declspec(naked) void uiShowList()
 
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
-	ConsoleFont = RegisterFont(FONT_CONSOLE); //Registering the Font before using it in the Menu
+	Font_Menu_GUID = RegisterFont(FONT_SMALL); //Registering the Font before using it in the Menu
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_F2)) //ChatSpam
@@ -438,18 +498,26 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		{
 			RandomCreds();
 			Sleep(100);
-		}
-		if (GetAsyncKeyState(VK_F11))//Change Team
+		} 
+		if (GetAsyncKeyState(VK_F11)) //Change Team
 		{
 			ChangeTeam();
+			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_F12))//Forces a juggernaut
+		if (GetAsyncKeyState(VK_F12)) //Forces a juggernaut
 		{
 			ForceJugg();
+			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_END))//Calls a vote which may crash the server
+		if (GetAsyncKeyState(VK_END)) //Calls a vote which may crash the server
 		{
 			CallCrashVote();
+			Sleep(100);
+		}
+		if (GetAsyncKeyState(VK_INSERT))
+		{
+			GrabGuidEnabled = GetState(GrabGuidEnabled);
+			Sleep(100);
 		}
 		
 		//SendCommandToConsole("say ^2Boboo's ^3MULTI^5HACK ^:beta");
@@ -459,122 +527,14 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 	return 1;
 }
 
-//DWORD WINAPI Console(LPVOID foo)
-//{
-//	AllocConsole();
-//	HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
-//	int hCrt = _open_osfhandle((long)handle_out, _O_TEXT);
-//	FILE* hf_out = _fdopen(hCrt, "w");
-//	setvbuf(hf_out, NULL, _IONBF, 1);
-//	*stdout = *hf_out;
-//
-//	HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
-//	hCrt = _open_osfhandle((long)handle_in, _O_TEXT);
-//	FILE* hf_in = _fdopen(hCrt, "r");
-//	setvbuf(hf_in, NULL, _IONBF, 128);
-//	*stdin = *hf_in;
-//	//https://justcheckingonall.wordpress.com/2008/08/29/console-window-win32-app/
-//
-//	bool MainEnabled = true;
-//	bool DevEnabled = true;
-//	std::string input;
-//	char buffer[1024];
-//
-//	std::cout << "Boboo's ModerWarfare 3 External Console" << std::endl;
-//	std::cout << "---------------------------------------" << std::endl;
-//	while (MainEnabled)
-//	{
-//		std::string input;
-//		int* MatchID = (int*)0xFF5058;
-//		std::cout << "Enter your command:" << std::endl;
-//		getline(std::cin, input);
-//		if (input == "exit")
-//			MainEnabled = false;
-//		if (input == "help")
-//		{
-//			std::cout << "juggernaut-allies -> Forces a juggernaut in allies team" << std::endl;
-//			std::cout << "juggernaut-axis -> Forces a juggernaut in axis team" << std::endl;
-//			std::cout << "spectator -> Puts yourself in specator mode" << std::endl;
-//			std::cout << "crash -> Crashes other clients when they vote" << std::endl;
-//			std::cout << "allies -> Changes your team to allies" << std::endl;
-//			std::cout << "axis -> Changes your team to axis" << std::endl;
-//			std::cout << "devmode -> You can execute your own commands now(It may crash if you fuck something up)" << std::endl;
-//		}
-//		if (input == "juggernaut-allies")
-//		{
-//			sprintf_s(buffer, "cmd mr %d 9 allies", *MatchID);
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "juggernaut-axis")
-//		{
-//			sprintf_s(buffer, "cmd mr %d 9 axis", *MatchID);
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "spectator")
-//		{
-//			sprintf_s(buffer, "cmd mr %d 2 spectator", *MatchID);
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "crash")
-//		{
-//			sprintf_s(buffer, "callvote map_rotate");
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "allies")
-//		{
-//			sprintf_s(buffer, "cmd mr %d 2 allies", *MatchID);
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "axis")
-//		{
-//			std::string cmd;
-//			sprintf_s(buffer, "cmd mr %d 2 axis", *MatchID);
-//			SendCommandToConsole(buffer);
-//		}
-//		if (input == "clear")
-//		{
-//			system("cls");
-//			std::cout << "Boboo's ModerWarfare 3 External Console" << std::endl;
-//			std::cout << "---------------------------------------" << std::endl;
-//		}
-//		if (input == "devmode")
-//		{
-//			std::cout << "Entered developer mode" << std::endl;
-//			while (DevEnabled)
-//			{
-//				std::string cmd;
-//				char buff[1024];
-//				std::cout << "Enter your command:" << std::endl;
-//				getline(std::cin, cmd);
-//				if (cmd == "exit")
-//					DevEnabled = false;
-//				if (cmd == "matchid")
-//				{
-//					std::cout << "MatchID:" << *MatchID << std::endl;
-//					continue;
-//				}
-//				strcpy_s(buff, cmd.c_str());
-//				SendCommandToConsole(buff);
-//			}
-//			std::cout << "Exited developer mode" << std::endl;
-//		}
-//		else
-//			std::cout << "Command not found" << std::endl;
-//		Sleep(5);
-//	}
-//	return 1;
-//}
-
-
-
 
 BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {
 	if (Reason == DLL_PROCESS_ATTACH) {
 		MessageBoxMethod("Attached to Process");
-		MakeJMP((PBYTE)0x0064427B, (DWORD)uiShowList, 5);
+		MakeJMP((PBYTE)0x0064427B, (DWORD)ShowMenu, 5);
 		CreateThread(NULL, 0, &_MainMethod, NULL, 0, NULL);
-		CreateThread(NULL, 0, &Console, NULL, 0, NULL);
+		//CreateThread(NULL, 0, &Console, NULL, 0, NULL);
 	}
 
 	return TRUE;

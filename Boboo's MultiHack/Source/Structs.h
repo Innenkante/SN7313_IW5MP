@@ -14,22 +14,22 @@ public:
 };
 typedef struct
 {
-	int Valid;                                                              //0x0
-	char _0x0004[0x8];                              //0x4
-	char Name[16];                                  //0xC
-	int Team;                                                               //0x1C
-	char _0x0020[0x4];                              //0x20
-	int Rank;                                                               //0x24
-	char _0x0028[0x10];                     //0x28
-	int Perk;                                                               //0x38
-	char _0x003C[0x8];                              //0x3C
-	int Score;                                                      //0x44
-	char _0x0048[0x458];                    //0x48
-	int Attacking;                                          //0x4A0
-	char _0x04A4[0x4];                              //0x4A4
-	int Zooming;                                            //0x4A8
-	char _0x04AC[0xB8];                     //0x4AC
-}ClientInfo_T;
+	int Valid;                     //0x0 - [0x009FC748]
+	char _0x0004[0x8];             //0x4 - [0x009FC74C]
+	char Name[16];                 //0xC - [0x009FC754]
+	int Team;                      //0x1C - [0x009FC764]
+	char _0x0020[0x4];             //0x20 - [0x009FC768]
+	int Rank;                      //0x24 - [0x009FC76C]
+	char _0x0028[0x10];            //0x28 - [0x009FC770]
+	int Perk;                      //0x38 - [0x009FC780]
+	char _0x003C[0x8];             //0x3C - [0x009FC784]
+	int Score;                     //0x44 - [0x009FC78C]
+	char _0x0048[0x458];           //0x48 - [0x009FC790]
+	int Attacking;                 //0x4A0 - [0x009FBE8]
+	char _0x04A4[0x4];             //0x4A4 - [0x009FBEC]
+	int Zooming;                           //0x4A8 - [0x009FBF0]
+	char _0x04AC[0xB8];            //0x4AC - [0x009FBF4]
+}ClientInfo_T; //[SIZE: 0x560]
 
 typedef struct
 {
