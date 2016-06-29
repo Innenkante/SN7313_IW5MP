@@ -1,4 +1,5 @@
 #pragma once
+
 //StandartHeaders
 #include <windows.h>
 #include <windef.h>
@@ -18,6 +19,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <math.h>
+#include <d3d.h>
 //
 
 
@@ -29,18 +32,8 @@
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )
 #define ScaleRadarY(y)(y * (480.0f / RefDef->Height) )
 
-//Methods
-void MessageBoxMethod(const LPCSTR sometext);
-void SendCommandToConsole(char* Cmd);
-void FixBlindPerks();
-void NoRecoil(bool state);
-void RandomCreds();
-void NoSpread(bool state);
-void UnlockClasses();
-void Laser(bool state);
-bool GetState(bool state);
-void _RegisterFont();
-void DrawTextMW3(float x, float y, void* pFont, float* color, const char *Text, ...);
+
+
 
 
 

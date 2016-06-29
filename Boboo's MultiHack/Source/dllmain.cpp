@@ -1,4 +1,4 @@
-
+//TODO CLEAN SOURCE FROM UNESCESSARY STUFF AND USE DIFFRENT FILES MAYBE?
 #include "stdafx.h"
 
 bool NoSpreadEnabled = false;
@@ -18,6 +18,7 @@ void* Font_Menu_GUID;
 
 
 DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
+DrawRotatedPic_t DrawRotatedPic_ = (DrawRotatedPic_t)0x0042F420;
 RegisterFont_t RegisterFont_ = (RegisterFont_t)REGISTERFONTOFF;
 DrawEngineRadar_t DrawEngineRadar_ = (DrawEngineRadar_t)DRAWENGINERADAROFF;
 OverlayPackage_t OverlayPackage_ = (OverlayPackage_t)0x0054BD70;
@@ -31,6 +32,9 @@ OverlayFriendly_t OverlayFriendly_ = (OverlayFriendly_t)0x004370C0;
 RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
 DrawNameTagsOverhead_t DrawNameTags_ = (DrawNameTagsOverhead_t)0x00588A10;
+
+//Aimbot section
+RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
 
 
 
@@ -267,7 +271,7 @@ void DrawRadar()
 	if (RadarEnabled)
 	{
 		RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-		CRadarHud radarhud;
+		RadarHud radarhud;
 		int RadarW = 225;
 		int RadarH = RadarW;
 
@@ -331,28 +335,42 @@ void CallCrashVote()
 	SendCommandToConsole(buffer);
 }
 
-//TODO Fix the number scaling faster!
 void GrabGUID()
 {
 	if (!GrabGuidEnabled)
 		return;
-	int fix = 0;
+	int Count_Entrys = 0;
 	for (int i = 0; i < 18; i++)
 	{
+		char* Name = (char*)(0x9FC754 + (i * (int)CLIENTSIZE)); //I am so fucking retardet client struct would have worked but I just forgot 2 brackets
+		if (strlen(Name) == 0)
+			continue;
 		int tmp = *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * i));
-		char tmp_buf[64];
-		if(i < 10)
-			sprintf_s(tmp_buf, " %d %d | %02d",fix, i, tmp);
-		sprintf_s(tmp_buf, "%d | %d", i, tmp);
-		DrawTextMW3(20, 200 + i * 20, Font_Menu_GUID, ColorGreen, tmp_buf);
+		if (tmp == 0)
+			continue;
+		Count_Entrys++;
+		char tmp_buf[2048];
+		sprintf_s(tmp_buf, "^3 %s ^3[^1 %d ^3] ^4| ^2 %d", Name,i, tmp);
+		DrawTextMW3(10, 190 + Count_Entrys * 24, RegisterFont(FONT_BIG_DEV), ColorWhite, tmp_buf);
 	}
+}
+
+void DrawCrossHair()
+{
+	RefDef_T* refdef = (RefDef_T*)REFDEFOFF;
+
+	if (!refdef->Width || !refdef->Height)
+		return;
+	DrawTextMW3(refdef->Width / 2 - 7 , refdef->Height / 2 + 10, RegisterFont(FONT_BIG_DEV), ColorGreen, "+"); //Maybe -6 and + 11?
 
 }
 
+//TODO DrawLine just to make it work xD 
 
 
 void Menu()
 {
+
 	char buf[4096];
 	sprintf(buf, "^2Boboo's ^3MultiHack ^4beta!\n");
 	strncat(buf, "^5WallHack[F3]: ", sizeof(buf));
@@ -401,7 +419,7 @@ void Menu()
 
 
 	if (MenuEnabled)
-		DrawTextMW3(550, 40, Font_Menu_GUID, ColorWhite, buf);
+		DrawTextMW3(550 / 2, 40, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
 }
 
 //HOOK!////////////////////////////////////////////////////////////////////////////////////
@@ -433,6 +451,7 @@ __declspec(naked) void ShowMenu()
 	}
 	Menu();
 	GrabGUID();
+	DrawCrossHair();
 	ChopperBoxes();
 	DrawRadar();
 	__asm
@@ -447,7 +466,6 @@ __declspec(naked) void ShowMenu()
 
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
-	Font_Menu_GUID = RegisterFont(FONT_SMALL); //Registering the Font before using it in the Menu
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_F2)) //ChatSpam
@@ -514,12 +532,11 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			CallCrashVote();
 			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_INSERT))
+		if (GetAsyncKeyState(VK_INSERT)) //Opens the stealing menu
 		{
 			GrabGuidEnabled = GetState(GrabGuidEnabled);
 			Sleep(100);
 		}
-		
 		//SendCommandToConsole("say ^2Boboo's ^3MULTI^5HACK ^:beta");
 		Sleep(10);
 	}
