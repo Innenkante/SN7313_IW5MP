@@ -331,7 +331,7 @@ void CallCrashVote()
 	SendCommandToConsole(buffer);
 }
 
-//TODO Fix the number scaling
+//TODO Fix the number scaling faster!
 void GrabGUID()
 {
 	if (!GrabGuidEnabled)
