@@ -31,11 +31,10 @@ OverlayFriendly_t OverlayFriendly_ = (OverlayFriendly_t)0x004370C0;
 
 RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
-DrawNameTagsOverhead_t DrawNameTags_ = (DrawNameTagsOverhead_t)0x00588A10;
 
-//Aimbot section
-RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
 
+//ESP
+//World2Screen_t World2Screen_ = (World2Screen_t)0x4E5FC0;
 
 
 
@@ -234,23 +233,9 @@ char* GetServerIP()
 	return buf;
 }
 
-void DrawNameTags()
-{
-	CG_T* cg = (CG_T*)CGOFF;
-	Entity_T* Entity[18];
-
-	for (int i = 0; i < 18; i++)
-	{
-		Entity[i] = (Entity_T*)(0x00A08630 + (i * 0x000001F8));
-		if (Entity[i]->Valid)
-			DrawNameTags_(cg->ClientNumber, *Entity[i], 1.0f);
-	}
-}
-
 
 void ChopperBoxes()
 {
-	DrawNameTags();
 	DWORD dwCall = 0x5AA470;
 	if (WhEnabled)
 	{
@@ -307,7 +292,7 @@ void ForceJugg()
 	if (LocalClient->Team == 1)
 		sprintf(buffer, "cmd mr %d 9 allies", *MagicNum);
 	if(LocalClient->Team == 2)
-		sprintf(buffer, "cmd mr %d 9 allies", *MagicNum);
+		sprintf(buffer, "cmd mr %d 9 axis", *MagicNum);
 	SendCommandToConsole(buffer);
 
 }
@@ -318,12 +303,7 @@ void ChangeTeam()
 	int* MagicNum = (int*)MATCHIDOFF;
 	char buffer[1024];
 	ClientInfo_T* LocalClient = (ClientInfo_T*)CLIENTOFF + CLIENTSIZE * cg->ClientNumber;
-	if (LocalClient->Team == 0)
-		return;
-	if (LocalClient->Team == 1)
-		sprintf(buffer, "cmd mr %d 2 axis", *MagicNum);
-	if(LocalClient->Team == 2)
-		sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
+	sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
 
 	SendCommandToConsole(buffer);
 }
@@ -342,15 +322,13 @@ void GrabGUID()
 	int Count_Entrys = 0;
 	for (int i = 0; i < 18; i++)
 	{
-		char* Name = (char*)(0x9FC754 + (i * (int)CLIENTSIZE)); //I am so fucking retardet client struct would have worked but I just forgot 2 brackets
-		if (strlen(Name) == 0)
-			continue;
-		int tmp = *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * i));
-		if (tmp == 0)
+		int GUID = *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * i));
+		ClientInfo_T* Client = (ClientInfo_T*)(CLIENTOFF + (i* (int)CLIENTSIZE));
+		if (!Client->Valid)
 			continue;
 		Count_Entrys++;
 		char tmp_buf[2048];
-		sprintf_s(tmp_buf, "^3 %s ^3[^1 %d ^3] ^4| ^2 %d", Name,i, tmp);
+		sprintf_s(tmp_buf, "^3 %s ^3[^1 %d ^3] ^4| ^2 %d", Client->Name,i, GUID);
 		DrawTextMW3(10, 190 + Count_Entrys * 24, RegisterFont(FONT_BIG_DEV), ColorWhite, tmp_buf);
 	}
 }
@@ -365,9 +343,83 @@ void DrawCrossHair()
 
 }
 
-//TODO DrawLine just to make it work xD 
+//ESP Region #Not Working till now :) 
+Vector3D VectorSubtract(Vector3D va, Vector3D vb)
+{
+	Vector3D out(0, 0, 0);
+	out.x = va.x - vb.x;
+	out.y = va.y - vb.y;
+	out.z = va.z - vb.z;
+	return out;
+}
 
+float DotProduct(Vector3D v1, Vector3D v2)
+{
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
 
+float VectorLength(const Vector3D v)
+{
+	return (float)sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+float GetDistance(Vector3D p1, Vector3D p2)
+{
+	Vector3D v(0,0,0);
+	v = VectorSubtract(p2, p1);
+	return VectorLength(v);
+}
+
+float* WorldToScreen(Vector3D World)
+{
+	//My RefDef
+	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+	//Get the enemy position
+	Vector3D Position = VectorSubtract(World, RefDef->Origin);
+	Vector3D Transform(0,0,0);
+
+	//Get the Dot Products from the View Angles of the player
+	Transform.x = DotProduct(Position, RefDef->ViewAxis[1]);
+	Transform.y = DotProduct(Position, RefDef->ViewAxis[2]);
+	Transform.z = DotProduct(Position, RefDef->ViewAxis[0]);
+
+	//Make sure the enemy is in front of the player. If not, return.
+	if (Transform.z < 0.1f)
+		return false;
+
+	//Calculate the center of the screen
+	Vector2D Center = Vector2D((float)RefDef->Width * 0.5f, (float)RefDef->Height * 0.5f);
+
+	//Calculates the screen coordinates
+	float* ScreenArray = 0;
+	ScreenArray[0] = Center.x * (1 - (Transform.x / RefDef->FovX / Transform.z));
+	ScreenArray[1] = Center.y * (1 - (Transform.y / RefDef->FovY / Transform.z));
+	return ScreenArray;
+
+}
+
+void DrawESP()
+{
+	std::ofstream ESPDump;
+	ESPDump.open("ESPDUMP.txt");
+	ClientInfo_T* Client[18];
+	Entity_T* Entity[18];
+	float* Coords = 0;
+	for (int i = 0; i < 18; i++)
+	{
+		Client [i]= (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i* (int)ENTITYSIZE));
+
+		Coords = WorldToScreen(Entity[i]->Origin);
+		//ESPDump << Client[i]->Name << ":" << "bullshit" << ":" << "bullshit" << std::endl;
+
+		//DrawTextMW3(*xScreen, *yScreen, RegisterFont(FONT_BOLD), ColorGreen, Client[i]->Name);
+	}
+	ESPDump.close();
+
+}
+
+//End ESP region
 void Menu()
 {
 
@@ -419,7 +471,7 @@ void Menu()
 
 
 	if (MenuEnabled)
-		DrawTextMW3(550 / 2, 40, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
+		DrawTextMW3(550, 40, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
 }
 
 //HOOK!////////////////////////////////////////////////////////////////////////////////////
@@ -537,6 +589,11 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			GrabGuidEnabled = GetState(GrabGuidEnabled);
 			Sleep(100);
 		}
+		if (GetAsyncKeyState(VK_NUMPAD0))
+		{
+			DrawESP();
+			Sleep(100);
+		}
 		//SendCommandToConsole("say ^2Boboo's ^3MULTI^5HACK ^:beta");
 		Sleep(10);
 	}
@@ -551,7 +608,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 		MessageBoxMethod("Attached to Process");
 		MakeJMP((PBYTE)0x0064427B, (DWORD)ShowMenu, 5);
 		CreateThread(NULL, 0, &_MainMethod, NULL, 0, NULL);
-		//CreateThread(NULL, 0, &Console, NULL, 0, NULL);
 	}
 
 	return TRUE;

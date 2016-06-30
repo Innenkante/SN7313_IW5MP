@@ -8,14 +8,8 @@ typedef void(__cdecl* DrawEngineRadar_t)(int unk1, int disableRotation, int unk2
 typedef void(__cdecl* OverlayPackage_t)(int a1, int a2, int a3, RadarHud* radar, int shader, vec4_t color);
 typedef void(*OverlayEnemy_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t color);
 typedef void(*OverlayFriendly_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t color);
-//TODO Maybe add these again
-//typedef void(*OverlayTurret_t)(int a1, int a2, int a3, CRadarHud* hud, vec4_t color);
-//typedef void(*OverlayHeli_t)(int a1, int a2, int a3, CRadarHud* hud, vec4_t color);
-//typedef void(*OverlayLocal_t)(int a1, int a2, int a3, CRadarHud* hud, vec4_t color);
-//typedef void(*OverlayPlane_t)(int a1, int a2, int a3, CRadarHud* hud, vec4_t col);
 typedef int* (*RegisterShader_t) (char* ShaderName);
 typedef ScreenMatrix* (__cdecl* GetScreenMatrix_t)();
-typedef void(__cdecl* DrawNameTagsOverhead_t)(int LocalClientNum, Entity_T EntityToDraw, float Value);
 
 //
 typedef int(__cdecl* RegisterTag_t)(char* Tag);
