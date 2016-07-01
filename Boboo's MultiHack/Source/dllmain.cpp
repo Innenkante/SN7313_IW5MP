@@ -78,7 +78,7 @@ int* RegisterShader(char* shader)
 	return RegisterShader_(shader);
 }
 
-void DrawTextMW3(float x, float y, void* pFont, float* color, const char *Text, ...)
+void DrawTextMW3(float x, float y, void* pFont, float* color, const char *Text, ...) //I was so happy when I got it done.... first I put it into a while loop and ask syntax why shit isn't working... he was like:"You poor innocent kid" xD
 {
 	char buf[1024] = "";
 	va_list va_alist;
@@ -286,9 +286,7 @@ void ForceJugg()
 	CG_T* cg = (CG_T*)CGOFF;
 	int* MagicNum = (int*)MATCHIDOFF;
 	char buffer[1024];
-	ClientInfo_T* LocalClient = (ClientInfo_T*)CLIENTOFF + CLIENTSIZE * cg->ClientNumber;
-	if (LocalClient->Team == 0)
-		return;
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (CLIENTSIZE * cg->ClientNumber));
 	if (LocalClient->Team == 1)
 		sprintf(buffer, "cmd mr %d 9 allies", *MagicNum);
 	if(LocalClient->Team == 2)
@@ -302,16 +300,18 @@ void ChangeTeam()
 	CG_T* cg = (CG_T*)CGOFF;
 	int* MagicNum = (int*)MATCHIDOFF;
 	char buffer[1024];
-	ClientInfo_T* LocalClient = (ClientInfo_T*)CLIENTOFF + CLIENTSIZE * cg->ClientNumber;
-	sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
-
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + CLIENTSIZE * cg->ClientNumber);
+	if(LocalClient->Team == 1)
+		sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
+	if(LocalClient->Team == 2)
+		sprintf(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
 	SendCommandToConsole(buffer);
 }
 
 void CallCrashVote()
 {
 	char buffer[1024];
-	sprintf(buffer,"callvote map_rotate");
+	sprintf(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
 	SendCommandToConsole(buffer);
 }
 
@@ -339,87 +339,32 @@ void DrawCrossHair()
 
 	if (!refdef->Width || !refdef->Height)
 		return;
-	DrawTextMW3(refdef->Width / 2 - 7 , refdef->Height / 2 + 10, RegisterFont(FONT_BIG_DEV), ColorGreen, "+"); //Maybe -6 and + 11?
+	DrawTextMW3(refdef->Width / 2 - 7 , refdef->Height / 2 + 10, RegisterFont(FONT_BIG_DEV), ColorGreen, "+"); //Maybe -6 and + 11? but atm it looks good doe
 
 }
 
-//ESP Region #Not Working till now :) 
-Vector3D VectorSubtract(Vector3D va, Vector3D vb)
+
+void DrawLine(float x1, float y1, float x2,float y2, vec4_t Color, int *Shader,int size) //Thx to Kenny I lub you <3
 {
-	Vector3D out(0, 0, 0);
-	out.x = va.x - vb.x;
-	out.y = va.y - vb.y;
-	out.z = va.z - vb.z;
-	return out;
+	ScreenMatrix *Screen = GetScreenMatrix_();
+	float x, y, angle, l1, l2, h1;
+	h1 = y2 - y1;
+	l1 = x2 - x1;
+	l2 = sqrt(l1 * l1 + h1 * h1);
+	x = x1 + ((l1 - l2) / 2);
+	y = y1 + (h1 / 2);
+	angle = (float)atan(h1 / l1) * (180 / 3.14159265358979323846);
+	DrawRotatedPic_(Screen, x, y, l2, size, angle, Color, Shader);
 }
 
-float DotProduct(Vector3D v1, Vector3D v2)
+void DrawRectangle(int x, int y, int w, int h, vec4_t color,int *Shader, int Size)//Not tested yet
 {
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	DrawLine(x, y, x + w, y, color, Shader,Size);
+	DrawLine(x + w, y, x + w, y + h, color, Shader,Size);
+	DrawLine(x + w, y + h, x, y + h, color, Shader,Size);
+	DrawLine(x, y + h, x, y, color, Shader,Size);
 }
 
-float VectorLength(const Vector3D v)
-{
-	return (float)sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
-float GetDistance(Vector3D p1, Vector3D p2)
-{
-	Vector3D v(0,0,0);
-	v = VectorSubtract(p2, p1);
-	return VectorLength(v);
-}
-
-float* WorldToScreen(Vector3D World)
-{
-	//My RefDef
-	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-	//Get the enemy position
-	Vector3D Position = VectorSubtract(World, RefDef->Origin);
-	Vector3D Transform(0,0,0);
-
-	//Get the Dot Products from the View Angles of the player
-	Transform.x = DotProduct(Position, RefDef->ViewAxis[1]);
-	Transform.y = DotProduct(Position, RefDef->ViewAxis[2]);
-	Transform.z = DotProduct(Position, RefDef->ViewAxis[0]);
-
-	//Make sure the enemy is in front of the player. If not, return.
-	if (Transform.z < 0.1f)
-		return false;
-
-	//Calculate the center of the screen
-	Vector2D Center = Vector2D((float)RefDef->Width * 0.5f, (float)RefDef->Height * 0.5f);
-
-	//Calculates the screen coordinates
-	float* ScreenArray = 0;
-	ScreenArray[0] = Center.x * (1 - (Transform.x / RefDef->FovX / Transform.z));
-	ScreenArray[1] = Center.y * (1 - (Transform.y / RefDef->FovY / Transform.z));
-	return ScreenArray;
-
-}
-
-void DrawESP()
-{
-	std::ofstream ESPDump;
-	ESPDump.open("ESPDUMP.txt");
-	ClientInfo_T* Client[18];
-	Entity_T* Entity[18];
-	float* Coords = 0;
-	for (int i = 0; i < 18; i++)
-	{
-		Client [i]= (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
-		Entity[i] = (Entity_T*)(ENTITYOFF + (i* (int)ENTITYSIZE));
-
-		Coords = WorldToScreen(Entity[i]->Origin);
-		//ESPDump << Client[i]->Name << ":" << "bullshit" << ":" << "bullshit" << std::endl;
-
-		//DrawTextMW3(*xScreen, *yScreen, RegisterFont(FONT_BOLD), ColorGreen, Client[i]->Name);
-	}
-	ESPDump.close();
-
-}
-
-//End ESP region
 void Menu()
 {
 
@@ -469,9 +414,13 @@ void Menu()
 	strncat(buf, GetServerIP(), sizeof(buf));
 	strncat(buf, "\n", sizeof(buf));
 
-
+	//Fucking ugly but hey it works
+	
 	if (MenuEnabled)
+	{
 		DrawTextMW3(550, 40, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
+		DrawLine(100, 100, 100, 100, ColorGreen, RegisterShader("white"), 100); //Play around with these values!
+	}
 }
 
 //HOOK!////////////////////////////////////////////////////////////////////////////////////
@@ -501,11 +450,11 @@ __declspec(naked) void ShowMenu()
 		PUSHAD;
 		PUSHFD;
 	}
-	Menu();
-	GrabGUID();
-	DrawCrossHair();
-	ChopperBoxes();
-	DrawRadar();
+	Menu(); //The ingame menu
+	GrabGUID(); //The little DrawText menu u see oin the right
+	DrawCrossHair(); //Crosshair dot
+	ChopperBoxes(); //The chopper boxes draw
+	DrawRadar(); //The second radar lmao
 	__asm
 	{
 		POPFD;
@@ -518,6 +467,7 @@ __declspec(naked) void ShowMenu()
 
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
+	//My keyboardhook
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_F2)) //ChatSpam
@@ -591,7 +541,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		}
 		if (GetAsyncKeyState(VK_NUMPAD0))
 		{
-			DrawESP();
+			//For testing purposes
 			Sleep(100);
 		}
 		//SendCommandToConsole("say ^2Boboo's ^3MULTI^5HACK ^:beta");
@@ -606,8 +556,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {
 	if (Reason == DLL_PROCESS_ATTACH) {
 		MessageBoxMethod("Attached to Process");
-		MakeJMP((PBYTE)0x0064427B, (DWORD)ShowMenu, 5);
-		CreateThread(NULL, 0, &_MainMethod, NULL, 0, NULL);
+		MakeJMP((PBYTE)0x0064427B, (DWORD)ShowMenu, 5); //Thanks to google/pastebin/hkDavy for showing me the hook
+		CreateThread(NULL, 0, &_MainMethod, NULL, 0, NULL); //Creating the Thread
 	}
 
 	return TRUE;

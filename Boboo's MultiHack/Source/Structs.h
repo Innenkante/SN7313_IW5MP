@@ -154,7 +154,7 @@ public:
 class ScreenMatrix
 {
 public:
-	char _0x0000[0xDC]; //64 before
+	char _0x0000[64]; //64 before
 };
 
 
