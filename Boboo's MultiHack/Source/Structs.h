@@ -25,21 +25,34 @@ public:
 };
 typedef struct
 {
-	int Valid;                     
-	char _0x0004[0x8];             
-	char Name[16];                 
-	int Team;                      
-	char _0x0020[0x4];             
-	int Rank;                      
-	char _0x0028[0x10];            
-	int Perk;                      
-	char _0x003C[0x8];            
-	int Score;                     
-	char _0x0048[0x458];           
-	int Attacking;                 
-	char _0x04A4[0x4];             
-	int Zooming;                         
-	char _0x04AC[0xB8];            
+	int ClientNumber; //0x0000 
+	int Valid; //0x0004 
+	char _0x0008[4];
+	char Name[16]; //0x000C 
+	int Team; //0x001C 
+	int Team_2; //0x0020 
+	int Rank; //0x0024 
+	char _0x0028[16];
+	int Perk; //0x0038 
+	char _0x003C[8];
+	int Score; //0x0044 
+	char _0x0048[8];
+	char BodyName[32]; //0x0050 
+	char _0x0070[32];
+	char HeadName[32]; //0x0090 
+	char _0x00B0[992];
+	BYTE IsStanding; //0x0490 
+	BYTE IsWalking; //0x0491 
+	BYTE IsSprinting; //0x0492 
+	char _0x0493[13];
+	int IsAttacking; //0x04A0 
+	char _0x04A4[4];
+	int IsZooming; //0x04A8 
+	char _0x04AC[68];
+	int WeaponNumber1; //0x04F0 
+	char _0x04F4[24];
+	int WeaponNumber2; //0x050C 
+	char _0x0510[80];
 }ClientInfo_T; 
 
 typedef struct
@@ -68,6 +81,30 @@ typedef struct
 	float ViewAngleY;                             
 	float ViewAngleX;                            
 }viewmatrix_t;
+
+enum Entity_Type
+{
+	General = 0,
+	Player = 1,
+	Player_Corpse = 2,
+	Item = 3,
+	Explosive = 4,
+	Invisible = 5,
+	ScriptMover = 6,
+	Sound = 7,
+	FX = 8,
+	Loop_FX = 9,
+	Primary_Light = 10,
+	Turret = 11,
+	Helicopter = 12,
+	Plane = 13,
+	Vehicle = 14,
+	Vehicle_Map = 15,
+	Vechicle_Corpse = 16,
+	Vechicle_Spawner = 17
+};
+
+
 
 typedef struct
 {
@@ -154,13 +191,13 @@ public:
 class ScreenMatrix
 {
 public:
-	char _0x0000[64]; //64 before
+	char _0x0000[0xDC]; //64 before
 };
 
-
-class w2s_t
+class trace_t
 {
 public:
-	char unknown[0xDC];
+	float Fraction;
+	char _0x0004[0x60];
 };
 
