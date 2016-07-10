@@ -1,7 +1,7 @@
 //TODO CLEAN SOURCE FROM UNESCESSARY STUFF AND USE DIFFRENT FILES MAYBE?
 #include "stdafx.h"
 
-bool AimbotEnabled = false;
+
 bool NoSpreadEnabled = false;
 bool NoRecoilEnabled = false;
 bool FullBrightEnabled = false;
@@ -23,6 +23,10 @@ bool ESP_DrawGUID = true;
 bool ESP_Draw3DBox = false;
 bool ESP_DrawWeapon = false;
 
+bool AimbotMenu_Enabled = false;
+bool Aimbot_Enabled = false;
+bool LockAim_Enabled = false;
+int CurrentAimBonePosition = 1;
 vec4_t ColorWhite = { 1.0f,1.0f,1.0f,1.0f };
 vec4_t ColorGreen = { 0.0f,  1.0f,  0.0f,  1.0f };
 vec4_t ColorRed = { 1.0f,  0.0f,  0.0f,  1.0f };
@@ -32,7 +36,13 @@ vec4_t ColorOrange = { 255.f, 165.f, 0.0f,1.0f };
 
 void* Font_Menu_GUID;
 
-//
+char* Bones_Collection[20] =
+{
+	"j_helmet"     , "j_head"         , "j_neck"
+	, "j_shoulder_le", "j_shoulder_ri"  , "j_elbow_le"   , "j_elbow_ri", "j_wrist_le", "j_wrist_ri", "j_gun"
+	, "j_mainroot"   , "j_spineupper"   , "j_spinelower" , "j_spine4"
+	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le"
+};
 
 DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
 DrawRotatedPic_t DrawRotatedPic_ = (DrawRotatedPic_t)0x0042F420;
@@ -50,8 +60,6 @@ RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
 World2Screen_t WorldToScreen_ = (World2Screen_t)0x004e5fc0;
 RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
-
-CG_Draw2D Draw2D = NULL;
 
 bool GetState(bool state)
 {
@@ -420,6 +428,11 @@ float GetDistance(Vector3D source, Vector3D destination)
 	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2) + pow(destination.z - source.z, 2));
 }
 
+float GetDistance(Vector2D source, Vector2D destination)
+{
+	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2));
+}
+
 float GetMagnitude(Vector3D vec)
 {
 	return sqrt(pow(vec.x, 2) + pow(vec.y, 2) + pow(vec.z, 2));
@@ -443,6 +456,15 @@ bool GetTagPos(Entity_T* ent, char* tagname, float* out)
 	}
 
 	return true;
+}
+
+Vector2D ParsVec(float ScreenInFloat[2])
+{
+	Vector2D vec(0, 0);
+	vec.x = ScreenInFloat[0];
+	vec.y = ScreenInFloat[1];
+
+	return vec;
 }
 
 Vector3D ParseVec(float PointInFloat[3])
@@ -500,9 +522,15 @@ Vector2D CalcAngles(Vector3D src, Vector3D dest,Vector3D ViewAxis[3])
 	
 	return angles;
 }
-void DoAimbot()
+
+//TODO Lock only on targets if they are in range of screeen pos
+
+//TODO Trace 
+
+//TODO Deathmatch fix aka FFA
+void DoAimbot(char* Bone)
 {
-	if (!AimbotEnabled)
+	if (!Aimbot_Enabled)
 		return;
 
 	Entity_T* Entity[18];
@@ -512,15 +540,12 @@ void DoAimbot()
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
 	int ClosestPlayerClientNumber = -1;
 	float ClosestDistance = 999999999999.f;
-	float TagPos_head[3];
+	float TagPos_bone[3];
 
 	for (int i = 0; i < 18; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
-
-		if (i == cg->ClientNumber)
-			continue;
 	}
 
 	for (int i = 0; i < 18; i++)
@@ -528,10 +553,10 @@ void DoAimbot()
 
 		if (Client[i]->Valid && Entity[i]->Valid && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive)
 		{
-			if (!GetTagPos(Entity[i], "j_head", TagPos_head))
+			if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 				continue;
 
-			float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_head));
+			float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
 			if (CurrentDistance < ClosestDistance)
 			{
 				ClosestPlayerClientNumber = Entity[i]->ClientNumber;
@@ -543,9 +568,9 @@ void DoAimbot()
 	if (ClosestPlayerClientNumber == -1)
 		return;
 
-	float fix[3];
-	GetTagPos(Entity[ClosestPlayerClientNumber], "j_head", fix);
-	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(fix), RefDef->ViewAxis);
+	float AimAt[3];
+	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
+	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -553,8 +578,6 @@ void DoAimbot()
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 }
-
-//TODO Aimbone
 
 DWORD GetWeaponPointer(int iWeaponID) {
 	return *(DWORD*)(0x8ddb50 + ((iWeaponID & 0xFF) * 0x4));
@@ -1010,6 +1033,23 @@ void ESP_Menu()
 
 }
 
+char* GetBone(int id)
+{
+	return Bones_Collection[id];
+}
+
+void Aim_Menu()
+{
+	char buf_aim[1024];
+	sprintf(buf_aim, "^2Aimbot ^3Menu \n");
+	strncat(buf_aim, "^5Bone: ^2", sizeof(buf_aim));
+	strncat(buf_aim, GetBone(CurrentAimBonePosition), sizeof(buf_aim));
+	strncat(buf_aim, "\n^5Change Bones [<-||->]",sizeof(buf_aim));
+	strncat(buf_aim, "\n", sizeof(buf_aim));
+	if(AimbotMenu_Enabled)
+		DrawTextMW3(10, 190, RegisterFont(FONT_BIG_DEV), ColorWhite, buf_aim);
+}
+
 void Menu()
 {
 
@@ -1017,6 +1057,9 @@ void Menu()
 	sprintf(buf, "^2Boboo's ^3MultiHack ^4beta!\n");
 	strncat(buf, "^5ESP[F3]: ", sizeof(buf));
 	strncat(buf, GetBoolInChar(ESPEnabled), sizeof(buf));
+	strncat(buf, "\n^5", sizeof(buf));
+	strncat(buf, "Aimbot[Down]:", sizeof(buf));
+	strncat(buf, GetBoolInChar(Aimbot_Enabled), sizeof(buf));
 	strncat(buf, "\n^5", sizeof(buf));
 	strncat(buf, "No Recoil[F4]: ", sizeof(buf));
 	strncat(buf, GetBoolInChar(NoRecoilEnabled), sizeof(buf));
@@ -1067,21 +1110,7 @@ void Menu()
 	}
 }
 
-//HOOK!////////////////////////////////////////////////////////////////////////////////////
-//void MakeJMP(BYTE *pAddress, DWORD dwJumpTo, DWORD dwLen)
-//{
-//	DWORD dwOldProtect, dwBkup, dwRelAddr;
-//
-//	VirtualProtect(pAddress, dwLen, PAGE_EXECUTE_READWRITE, &dwOldProtect);
-//	dwRelAddr = (DWORD)(dwJumpTo - (DWORD)pAddress) - 5;
-//	*pAddress = 0xE9;
-//
-//	*((DWORD *)(pAddress + 0x1)) = dwRelAddr;
-//	for (DWORD x = 0x5; x < dwLen; x++) *(pAddress + x) = 0x90;
-//	VirtualProtect(pAddress, dwLen, dwOldProtect, &dwBkup);
-//
-//	return;
-//}
+
 
 void *DetourFunction(BYTE *src, const BYTE *dst, const int len)
 {
@@ -1104,7 +1133,7 @@ void *DetourFunction(BYTE *src, const BYTE *dst, const int len)
 DWORD dwCall = HOOKCALL;
 DWORD dwReturn = HOOKRETURN; 
 
-__declspec(naked) void ShowMenu()
+__declspec(naked) void hkShowList()
 {
 	__asm
 	{
@@ -1118,6 +1147,7 @@ __declspec(naked) void ShowMenu()
 	ESP_Menu(); //The ESP Menu
 	DrawRadar(); //The second radar lmao
 	ESP_Main();
+	Aim_Menu();
 	__asm
 	{
 		POPFD;
@@ -1127,41 +1157,19 @@ __declspec(naked) void ShowMenu()
 	}
 }/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Func()
+void AimbotWrapper()
 {
-	DrawTextMW3(200, 200, RegisterFont(FONT_BIG), ColorBlue, "CG_Draw2D hook");
+	DoAimbot(GetBone(CurrentAimBonePosition));
 }
 
-void PlaceJMP(BYTE *pAddress, DWORD dwJumpTo, DWORD dwLen) {
-	DWORD dwOldProtect, dwBkup, dwRelAddr;
 
-	// Basic VirtualProtect... y'all should know this
-	VirtualProtect(pAddress, dwLen, PAGE_EXECUTE_READWRITE, &dwOldProtect);
-
-	// Calculate the "distance" we're gonna have to jump - the size of the JMP instruction
-	dwRelAddr = (DWORD)(dwJumpTo - (DWORD)pAddress) - 5;
-
-	// Write the JMP opcode @ our jump position...
-	*pAddress = 0xE9;
-
-	// Write the offset to where we're gonna jump
-	*((DWORD *)(pAddress + 0x1)) = dwRelAddr;
-
-	// Overwrite the rest of the bytes with NOPs
-	for (DWORD x = 0x5; x < dwLen; x++)
-		*(pAddress + x) = 0x90;
-
-	// Restore the default permissions
-	VirtualProtect(pAddress, dwLen, dwOldProtect, &dwBkup);
-
-}
 DWORD dwJMPback = 0x430436;
-__declspec(naked) void hkDraw2D()
+__declspec(naked) void hkDraw2D() //MPGH I lub you
 {
 	__asm PUSHAD
 	__asm PUSHFD
 
-	DoAimbot();
+	AimbotWrapper();
 
 	__asm POPFD
 	__asm POPAD
@@ -1174,12 +1182,17 @@ __declspec(naked) void hkDraw2D()
 	__asm JMP[dwJMPback]
 }
 
+
+
+
+
+
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
 	//My keyboardhook
 	while (true)
 	{
-		if (GetAsyncKeyState(VK_F2)) //ChatSpam
+		if (GetAsyncKeyState(VK_F2)) //Menu
 		{
 			MenuEnabled = GetState(MenuEnabled);
 			Sleep((100));
@@ -1255,8 +1268,32 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		}
 		if (GetAsyncKeyState(VK_DOWN))
 		{
-			AimbotEnabled = GetState(AimbotEnabled); 
+			Aimbot_Enabled = GetState(Aimbot_Enabled); 
 			Sleep(100);
+		}
+		if (GetAsyncKeyState(VK_UP))
+		{
+			AimbotMenu_Enabled = GetState(AimbotMenu_Enabled);
+			Sleep(100);
+		}
+		if (AimbotMenu_Enabled)
+		{
+			if (GetAsyncKeyState(VK_RIGHT))
+			{
+				if (CurrentAimBonePosition == 19)
+					CurrentAimBonePosition = 0;
+				else
+					CurrentAimBonePosition++;
+				Sleep(100);
+			}
+			if (GetAsyncKeyState(VK_LEFT))
+			{
+				if (CurrentAimBonePosition == 0)
+					CurrentAimBonePosition = 19;
+				else
+					CurrentAimBonePosition--;
+				Sleep(100);
+			}
 		}
 		if (ESPMenu_Enabled)
 		{
@@ -1326,6 +1363,8 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			GrabGuidEnabled = false;
 			ESPMenu_Enabled = false;
 			ESPEnabled = false;
+			AimbotMenu_Enabled = false;
+			Aimbot_Enabled = false;
 		}
 	}
 
@@ -1337,8 +1376,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {
 	if (Reason == DLL_PROCESS_ATTACH) {
 		MessageBoxMethod("Attached to Process");
-		DetourFunction((PBYTE)0x0064427B, (PBYTE)ShowMenu, 5); //Thanks to google/pastebin/hkDavy for showing me the hook
-		PlaceJMP((PBYTE)0x430430, (DWORD)hkDraw2D, 6); //MPGH ftw
+		DetourFunction((PBYTE)0x0064427B, (PBYTE)hkShowList, 5); //Thanks to google/pastebin/hkDavy for showing me the hook
+		DetourFunction((PBYTE)0x430430, (PBYTE)hkDraw2D, 6); //MPGH ftw
 		CreateThread(NULL, 0, &_MainMethod, NULL, 0, NULL); //Creating the Thread
 	}
 
