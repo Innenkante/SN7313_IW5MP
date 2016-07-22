@@ -29,6 +29,8 @@
 #include "Structs.h"
 #include "Typedefs.h"
 #include "Drawing.h"
+
+
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )
 #define ScaleRadarY(y)(y * (480.0f / RefDef->Height) )
 

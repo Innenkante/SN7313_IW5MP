@@ -12,21 +12,23 @@ bool GrabGuidEnabled = false;
 bool ESPEnabled = false;
 bool ESPMenu_Enabled = false;
 //ESPConfigMenu Values
-bool ESP_DrawBox = true;
+bool ESP_DrawBox = false;
 bool ESP_DrawBones = true;
 bool ESP_DrawName = true;
-bool ESP_DrawClientNum = true;
-bool ESP_DrawRank = true;
+bool ESP_DrawClientNum = false;
+bool ESP_DrawRank = false;
 bool ESP_DrawDistance = true;
-bool ESP_DrawScore = true;
-bool ESP_DrawGUID = true;
-bool ESP_Draw3DBox = false;
-bool ESP_DrawWeapon = false;
+bool ESP_DrawScore = false;
+bool ESP_DrawGUID = false;
+bool ESP_Draw3DBox = true;
+bool ESP_DrawWeapon = true;
 
 bool AimbotMenu_Enabled = false;
 bool Aimbot_Enabled = false;
 bool LockAim_Enabled = false;
 int CurrentAimBonePosition = 1;
+int FieldOfAim = 50;
+int currentaimtype = 2;
 vec4_t ColorWhite = { 1.0f,1.0f,1.0f,1.0f };
 vec4_t ColorGreen = { 0.0f,  1.0f,  0.0f,  1.0f };
 vec4_t ColorRed = { 1.0f,  0.0f,  0.0f,  1.0f };
@@ -40,7 +42,7 @@ char* Bones_Collection[20] =
 {
 	"j_helmet"     , "j_head"         , "j_neck"
 	, "j_shoulder_le", "j_shoulder_ri"  , "j_elbow_le"   , "j_elbow_ri", "j_wrist_le", "j_wrist_ri", "j_gun"
-	, "j_mainroot"   , "j_spineupper"   , "j_spinelower" , "j_spine4"
+	, "j_mainroot"   , "j_spineupper"   , "pelvis" , "j_spine4"
 	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le"
 };
 
@@ -60,6 +62,8 @@ RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
 World2Screen_t WorldToScreen_ = (World2Screen_t)0x004e5fc0;
 RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
+bool(__cdecl* CL_IsEntityVisible)(int, gentity_t*) = (bool(__cdecl*)(int, gentity_t*))0x54E6D0;
+
 
 bool GetState(bool state)
 {
@@ -111,6 +115,13 @@ void DrawTextMW3(float x, float y, void* pFont, float* color, const char *Text, 
 	DrawEngineText_((char*)Text, 0x7FFFFFFF, pFont, x, y, 1.0f, 1.0f, 0.0f, color, 0);
 }
 
+void AdvancedUAV()
+{
+	CG_T* cg = (CG_T*)CGOFF;
+	cg->AdvancedUAV = 1;
+}
+
+
 void NoRecoil(bool state)
 {
 	BYTE* nr = (BYTE*)NORECOILOFF;
@@ -138,7 +149,7 @@ void ChangeName()
 	int random = rand() % 100;
 	char* name = (char*)PLAYERNAMEOFF;
 	char newname[16];
-	sprintf(newname, "Bot %d", random);
+	sprintf(newname, "Rekter %d", random);
 	for (int i = 0; i < 16; i++)
 		name[i] = newname[i];
 }
@@ -154,19 +165,19 @@ void RandomCreds()
 	ChangeName();
 }
 
-void FixBlindPerks()
-{
-	ClientInfo_T* Clients[18];
-	for (int i = 0; i < 18; i++)
-	{
-		Clients[i] = (ClientInfo_T*)(CLIENTOFF + ((int)CLIENTSIZE * i));
-		if (Clients[i] != Clients[*(int*)0x8FF250])
-		{
-			if (Clients[i]->Perk & 0x20 || Clients[i]->Perk & 0x40)
-				Clients[i]->Perk = 0x0;
-		}
-	}
-}
+//void FixBlindPerks()
+//{
+//	ClientInfo_T* Clients[18];
+//	for (int i = 0; i < 18; i++)
+//	{
+//		Clients[i] = (ClientInfo_T*)(CLIENTOFF + ((int)CLIENTSIZE * i));
+//		if (Clients[i] != Clients[*(int*)0x8FF250])
+//		{
+//			if (Clients[i]->Perk & 0x20 || Clients[i]->Perk & 0x40)
+//				Clients[i]->Perk = 0x0;
+//		}
+//	}
+//}
 
 void FullBright(bool state)
 {
@@ -296,6 +307,8 @@ void DrawRadar()
 		//OverlayLocal_(0, 0, 0, &radarhud, ColorBlue);
 		OverlayEnemey_(0, 0, 0, &radarhud, ColorRed);
 		OverlayFriendly_(0, 0, 0, &radarhud, ColorGreen);
+
+		AdvancedUAV();
 
 	}
 	else
@@ -476,6 +489,16 @@ Vector3D ParseVec(float PointInFloat[3])
 	return vec;
 }
 
+float* ParseFloat(Vector3D PointInVec)
+{
+	float* point = 0;
+	point[0] = PointInVec.x;
+	point[1] = PointInVec.y;
+	point[2] = PointInVec.z;
+	
+	return point;
+}
+
 Vector3D SubtractVec(Vector3D src, Vector3D dest)
 {
 	Vector3D vec(0, 0, 0);
@@ -523,12 +546,21 @@ Vector2D CalcAngles(Vector3D src, Vector3D dest,Vector3D ViewAxis[3])
 	return angles;
 }
 
-//TODO Lock only on targets if they are in range of screeen pos
 
-//TODO Trace 
+bool IsVisible(int clientnum)
+{
+	return CL_IsEntityVisible(0, (gentity_t*)(0x00A08630 + (0x1F8 * (clientnum & 2047))));
+}
 
-//TODO Deathmatch fix aka FFA
-void DoAimbot(char* Bone)
+void Shoot()
+{
+	byte* Scoped = (byte*)0x10603B0;
+	Input_t* Input = (Input_t*)0x00B39EE0;
+	*Scoped = 1;
+	Input->Weapon.Pressed = 1;
+}
+
+void DoAimbot(char* Bone,int AimType)
 {
 	if (!Aimbot_Enabled)
 		return;
@@ -537,10 +569,18 @@ void DoAimbot(char* Bone)
 	ClientInfo_T* Client[18];
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 	CG_T* cg = (CG_T*)(CGOFF);
+	CGS_T* cgs = (CGS_T*)(CGSOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
 	int ClosestPlayerClientNumber = -1;
 	float ClosestDistance = 999999999999.f;
 	float TagPos_bone[3];
+	float Screen_bone[2];
+	bool DeathMatch = false;
+
+	if (cgs->GameType[0] == 'd' && cgs->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -548,19 +588,97 @@ void DoAimbot(char* Bone)
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 	}
 
-	for (int i = 0; i < 18; i++)
+	
+	if (AimType == AimbotType::Closest)
 	{
-
-		if (Client[i]->Valid && Entity[i]->Valid && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive)
+		for (int i = 0; i < 18; i++)
 		{
-			if (!GetTagPos(Entity[i], Bone, TagPos_bone))
-				continue;
-
-			float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
-			if (CurrentDistance < ClosestDistance)
+			if (DeathMatch)
 			{
-				ClosestPlayerClientNumber = Entity[i]->ClientNumber;
-				ClosestDistance = CurrentDistance;
+				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
+				{
+					
+					if (!IsVisible(Entity[i]->ClientNumber))
+						continue;
+
+					if (!GetTagPos(Entity[i], Bone, TagPos_bone))
+						continue;
+
+					float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
+					if (CurrentDistance < ClosestDistance)
+					{
+						ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+						ClosestDistance = CurrentDistance;
+					}
+				}
+				continue;
+			}
+			else if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive)
+			{
+				if (!GetTagPos(Entity[i], Bone, TagPos_bone))
+					continue;
+				if (!IsVisible(Entity[i]->ClientNumber))
+					continue;
+				float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
+				if (CurrentDistance < ClosestDistance)
+				{
+					ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+					ClosestDistance = CurrentDistance;
+				}
+			}
+		}
+	}
+
+
+	if (AimType == AimbotType::InScreenRange)
+	{
+		for (int i = 0; i < 18; i++)
+		{
+			if (DeathMatch)
+			{
+				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
+				{
+					if (!GetTagPos(Entity[i], Bone, TagPos_bone))
+						return;
+					WorldToScreen_(0x0, GetScreenMatrix_(), TagPos_bone, Screen_bone);
+					float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
+					float DistancePlayerBoneToScreenCenter = GetDistance(ParseVec(PlayerScreenCenter), ParseVec(Screen_bone));
+
+					if (!IsVisible(Entity[i]->ClientNumber))
+						continue;
+
+					if (DistancePlayerBoneToScreenCenter < FieldOfAim)
+					{
+						if (DistancePlayerBoneToScreenCenter < ClosestDistance)
+						{
+
+							ClosestDistance = DistancePlayerBoneToScreenCenter;
+							ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+
+						}
+					}
+				}
+				continue;
+			}
+			if (Client[i]->Valid && Entity[i]->Valid && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48)
+			{
+				if (!GetTagPos(Entity[i], Bone, TagPos_bone))
+					return;
+				WorldToScreen_(0x0, GetScreenMatrix_(), TagPos_bone, Screen_bone);
+				float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
+				float DistancePlayerBoneToScreenCenter = GetDistance(ParseVec(PlayerScreenCenter), ParseVec(Screen_bone));
+
+				if (!IsVisible(Entity[i]->ClientNumber))
+					continue;
+
+				if (DistancePlayerBoneToScreenCenter < FieldOfAim)
+				{
+					if (DistancePlayerBoneToScreenCenter < ClosestDistance)
+					{
+						ClosestDistance = DistancePlayerBoneToScreenCenter;
+						ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+					}
+				}
 			}
 		}
 	}
@@ -577,6 +695,8 @@ void DoAimbot(char* Bone)
 
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
+
+	Shoot();
 }
 
 DWORD GetWeaponPointer(int iWeaponID) {
@@ -622,19 +742,25 @@ void ESP_Draw3DBoxes()
 	ClientInfo_T* Client[18];
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	CGS_T * CGS = (CGS_T*)CGSOFF;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
 
 	for (int i = 0; i < 18; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
 		{
-			if (CGS->GameType == "dm")
+			if (DeathMatch)
 			{
 				Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, RegisterShader("white"));
-				return;
+				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
 				Draw3DBox(Entity[i]->Origin, 40, 80, ColorGreen, RegisterShader("white"));
@@ -651,13 +777,19 @@ void ESP_ColorBones()
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
 	CGS_T * CGS = (CGS_T*)CGSOFF;
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
 
 	for (int i = 0; i < 18; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
 		{
 			//Legs
 			float TagPos_hip_r[3];
@@ -778,7 +910,9 @@ void ESP_ColorBones()
 			//Pelvis
 			WorldToScreen_(0x0, Matrix, TagPos_Pelvis, Screen_Pelvis);
 
-			if (CGS->GameType == "dm ")
+			DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, RegisterShader("white"), 5); //The Peniiiis
+
+			if (DeathMatch)
 			{
 				DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, RegisterShader("white"), 2);
 				DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, RegisterShader("white"), 2);
@@ -806,7 +940,8 @@ void ESP_ColorBones()
 				//Neck -> Backbone connection
 				DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, RegisterShader("white"), 2);
 				DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, RegisterShader("white"), 5);
-				return;
+
+				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
 			{
@@ -866,8 +1001,6 @@ void ESP_ColorBones()
 				//Neck -> Backbone connection
 				DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, RegisterShader("white"), 2);
 			}
-
-			DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1 , Screen_Pelvis[1] + 1, ColorOrange, RegisterShader("white"), 5);
 		}
 	}
 
@@ -882,13 +1015,19 @@ void ESP_Draw2DBoxes()
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
-	CGS_T * CGS = (CGS_T*)CGSOFF;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
 
 	for (int i = 0;i < 18;i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
 		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive &&  Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive &&  Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Clients[i]->Valid)
 		{
 			float TagPos_head[3];
 			float Screen_head[2];
@@ -955,10 +1094,10 @@ void ESP_Draw2DBoxes()
 
 			if (ESP_DrawBox)
 			{
-				if (sizeof(CGS->GameType) == 2)
+				if (DeathMatch)
 				{
 					DrawRectangle(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_ankle_r[0], Screen_ankle_r[1], Screen_ankle_l[0], Screen_ankle_l[1],ColorRed,RegisterShader("white"),2);
-					return;
+					continue;
 				}
 				if (Clients[i]->Team == LocalClient->Team)
 					DrawRectangle(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_ankle_r[0], Screen_ankle_r[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, RegisterShader("white"), 2);
@@ -1038,14 +1177,34 @@ char* GetBone(int id)
 	return Bones_Collection[id];
 }
 
+char* GetFieldOfAim(int field)
+{
+	char foo[64];
+	sprintf(foo, "%d", field);
+	return foo;
+}
+
+char* GetAimType(int type)
+{
+	char foo[64];
+	if (type == AimbotType::Closest)
+		sprintf(foo, "Closest to position");
+	if (type == AimbotType::InScreenRange)
+		sprintf(foo, "Closest to view");
+	return foo;
+}
+
 void Aim_Menu()
 {
 	char buf_aim[1024];
 	sprintf(buf_aim, "^2Aimbot ^3Menu \n");
-	strncat(buf_aim, "^5Bone: ^2", sizeof(buf_aim));
+	strncat(buf_aim, "^5Aimbot Type [/]: ^2", sizeof(buf_aim));
+	strncat(buf_aim, GetAimType(currentaimtype), sizeof(buf_aim));
+	strncat(buf_aim, "\n^5Bone[<-||->]: ^2", sizeof(buf_aim));
 	strncat(buf_aim, GetBone(CurrentAimBonePosition), sizeof(buf_aim));
-	strncat(buf_aim, "\n^5Change Bones [<-||->]",sizeof(buf_aim));
-	strncat(buf_aim, "\n", sizeof(buf_aim));
+	strncat(buf_aim, "\n^5Field of Aim[+|-]: ^2", sizeof(buf_aim));
+	strncat(buf_aim, GetFieldOfAim(FieldOfAim), sizeof(buf_aim));
+	strncat(buf_aim, "\n",sizeof(buf_aim));
 	if(AimbotMenu_Enabled)
 		DrawTextMW3(10, 190, RegisterFont(FONT_BIG_DEV), ColorWhite, buf_aim);
 }
@@ -1054,7 +1213,7 @@ void Menu()
 {
 
 	char buf[4096];
-	sprintf(buf, "^2Boboo's ^3MultiHack ^4beta!\n");
+	sprintf(buf, "^2SN7313! ^3Public ^1ver 1.0\n");
 	strncat(buf, "^5ESP[F3]: ", sizeof(buf));
 	strncat(buf, GetBoolInChar(ESPEnabled), sizeof(buf));
 	strncat(buf, "\n^5", sizeof(buf));
@@ -1110,8 +1269,6 @@ void Menu()
 	}
 }
 
-
-
 void *DetourFunction(BYTE *src, const BYTE *dst, const int len)
 {
 	BYTE *jmp = (BYTE*)malloc(len + 5);
@@ -1159,7 +1316,7 @@ __declspec(naked) void hkShowList()
 
 void AimbotWrapper()
 {
-	DoAimbot(GetBone(CurrentAimBonePosition));
+	DoAimbot(GetBone(CurrentAimBonePosition),currentaimtype);
 }
 
 
@@ -1183,10 +1340,6 @@ __declspec(naked) void hkDraw2D() //MPGH I lub you
 }
 
 
-
-
-
-
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
 	//My keyboardhook
@@ -1197,7 +1350,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			MenuEnabled = GetState(MenuEnabled);
 			Sleep((100));
 		}
-		if (GetAsyncKeyState(VK_F3)) //ChopperBox
+		if (GetAsyncKeyState(VK_F3)) //ESP
 		{
 			ESPEnabled = GetState(ESPEnabled);
 			Sleep(100);
@@ -1266,12 +1419,12 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			ESPMenu_Enabled = GetState(ESPMenu_Enabled);
 			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_DOWN))
+		if (GetAsyncKeyState(VK_DOWN)) //Aimboat
 		{
 			Aimbot_Enabled = GetState(Aimbot_Enabled); 
 			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_UP))
+		if (GetAsyncKeyState(VK_UP)) //Aimboat Menu
 		{
 			AimbotMenu_Enabled = GetState(AimbotMenu_Enabled);
 			Sleep(100);
@@ -1292,6 +1445,26 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 					CurrentAimBonePosition = 19;
 				else
 					CurrentAimBonePosition--;
+				Sleep(100);
+			}
+			if (GetAsyncKeyState(VK_SUBTRACT))
+			{
+				FieldOfAim--;
+			}
+			if (GetAsyncKeyState(VK_ADD))
+			{
+				FieldOfAim++;
+			}
+			if (GetAsyncKeyState(VK_DIVIDE))
+			{
+				if (currentaimtype == AimbotType::Closest)
+				{
+					currentaimtype = AimbotType::InScreenRange;
+				}
+				else
+				{
+					currentaimtype = AimbotType::Closest;
+				}
 				Sleep(100);
 			}
 		}

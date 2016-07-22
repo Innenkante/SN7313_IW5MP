@@ -11,9 +11,9 @@ typedef void(*OverlayFriendly_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t c
 typedef int* (*RegisterShader_t) (char* ShaderName);
 typedef ScreenMatrix* (*GetScreenMatrix_t)();
 typedef bool(*World2Screen_t)(int unknown, ScreenMatrix* w2scalc, float* vPoint, float* Screen);
-//
 typedef int(__cdecl* RegisterTag_t)(char* Tag);
 
 
-
+//Thanks kenny
+typedef int gentity_t;
 

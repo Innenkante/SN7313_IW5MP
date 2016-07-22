@@ -197,10 +197,35 @@ public:
 class trace_t
 {
 public:
-	float Fraction;
+	float Fraction; //0x0000 
 	char _0x0004[0x60];
 };
 
+enum AimbotType
+{
+	Closest = 1,
+	InScreenRange = 2,
+};
+
+typedef struct {
+	BYTE Active;
+	BYTE Pressed;
+	char padding[18];
+}Key;
+
+typedef struct {
+	char unk1[216];
+	Key Jump;
+	char unk2[60];
+	Key Weapon;
+	Key HoldBreath;
+	char unk3[20];
+	Key Lethal;
+	Key Tactical;
+	Key Knife;
+	Key Use;
+	Key Reload;
+}Input_t;
 
 
 
