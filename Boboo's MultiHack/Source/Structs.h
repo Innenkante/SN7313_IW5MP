@@ -194,12 +194,12 @@ public:
 	char _0x0000[0xDC]; //64 before
 };
 
-class trace_t
+typedef struct
 {
-public:
-	float Fraction; //0x0000 
-	char _0x0004[0x60];
-};
+	float fraction;
+	char _0x004[44];
+}Trace_t;
+
 
 enum AimbotType
 {
@@ -226,6 +226,24 @@ typedef struct {
 	Key Use;
 	Key Reload;
 }Input_t;
+
+typedef struct
+{
+	char _pad0[1116];
+	float swayMultiplier;    //0x045C 
+	float swayMultiplierADS; //0x0460 
+}weaponInfo_t;
+
+typedef struct 
+{
+	char * weaponmodel;
+	weaponInfo_t * info;
+	char * weaponname;
+	char pad1[114];
+	int* shader;
+}weapon_t;
+
+
 
 
 

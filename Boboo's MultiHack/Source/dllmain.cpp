@@ -22,6 +22,7 @@ bool ESP_DrawScore = false;
 bool ESP_DrawGUID = false;
 bool ESP_Draw3DBox = true;
 bool ESP_DrawWeapon = true;
+bool ESP_Snaplines = true;
 
 bool AimbotMenu_Enabled = false;
 bool Aimbot_Enabled = false;
@@ -62,7 +63,7 @@ RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
 World2Screen_t WorldToScreen_ = (World2Screen_t)0x004e5fc0;
 RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
-bool(__cdecl* CL_IsEntityVisible)(int, gentity_t*) = (bool(__cdecl*)(int, gentity_t*))0x54E6D0;
+bool(__cdecl* CL_IsEntityVisible)(int, int*) = (bool(__cdecl*)(int, int*))0x54E6D0;
 
 
 bool GetState(bool state)
@@ -119,6 +120,7 @@ void AdvancedUAV()
 {
 	CG_T* cg = (CG_T*)CGOFF;
 	cg->AdvancedUAV = 1;
+	*(BYTE*)(*(DWORD*)(0x1C2C39C) + 0xC) = 1;
 }
 
 
@@ -546,10 +548,13 @@ Vector2D CalcAngles(Vector3D src, Vector3D dest,Vector3D ViewAxis[3])
 	return angles;
 }
 
+//TODO Trying the Trace ( CG_Trace ) in the aimbot directly to see what happens then :) maybe it is just not thread safe and thats why it crashes
+
+
 
 bool IsVisible(int clientnum)
 {
-	return CL_IsEntityVisible(0, (gentity_t*)(0x00A08630 + (0x1F8 * (clientnum & 2047))));
+	return CL_IsEntityVisible(0, (int*)(0x00A08630 + (0x1F8 * (clientnum & 2047))));
 }
 
 void Shoot()
@@ -593,6 +598,7 @@ void DoAimbot(char* Bone,int AimType)
 	{
 		for (int i = 0; i < 18; i++)
 		{
+			
 			if (DeathMatch)
 			{
 				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
@@ -615,6 +621,8 @@ void DoAimbot(char* Bone,int AimType)
 			}
 			else if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive)
 			{
+
+
 				if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 					continue;
 				if (!IsVisible(Entity[i]->ClientNumber))
@@ -699,21 +707,12 @@ void DoAimbot(char* Bone,int AimType)
 	Shoot();
 }
 
-DWORD GetWeaponPointer(int iWeaponID) {
-	return *(DWORD*)(0x8ddb50 + ((iWeaponID & 0xFF) * 0x4));
+weapon_t* GetWeapon(int WeaponID)
+{
+	
+	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
 }
 
-char* GetWeaponName(int iWeaponID) {
-	static char szWeapon[32];
-	szWeapon[0] = 0;
-	DWORD dwWeaponName = *(DWORD*)(GetWeaponPointer(iWeaponID) + 0x8);
-	strcpy_s(szWeapon, (char*)dwWeaponName);
-	if (strstr(szWeapon, "WEAPON_")) {
-		char* szFixString = strrchr(szWeapon, '_') + 1;
-		strcpy_s(szWeapon, szFixString);
-	}
-	return szWeapon;
-}
 
 void ESP_DrawWeapons()
 {
@@ -725,17 +724,58 @@ void ESP_DrawWeapons()
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		if (Entity[i]->Type == Entity_Type::Item)
 		{
-			char* ItemName = GetWeaponName(Entity[i]->WeaponID);
+			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (ItemName != NULL)
-				DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorWhite, ItemName);
-			WeaponESPDump << ItemName << ":" << ItemName << std::endl;
+			if (Weapon->weaponname != NULL)
+			{
+				DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
+			}
 		}
 	}
 }
 
+void ESP_DrawSnaplines()
+{
+	Entity_T* Entity[18];
+	ClientInfo_T* Client[18];
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
+		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
+		RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
+		{
+			float TagPos[3];
+			float ScreenPos[2];
+
+			GetTagPos(Entity[i], "j_head", TagPos);
+			WorldToScreen_(0x0, GetScreenMatrix_(), TagPos, ScreenPos);
+
+			if (DeathMatch)
+			{
+				DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, RegisterShader("white"), 2);
+				continue;
+			}
+			if (Client[i]->Team == LocalClient->Team)
+				DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorGreen, RegisterShader("white"), 2);
+			else
+				DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, RegisterShader("white"), 2);
+		}
+
+	}
+}
 void ESP_Draw3DBoxes()
 {
 	Entity_T* Entity[18];
@@ -1129,6 +1169,8 @@ void ESP_Main()
 			ESP_Draw3DBoxes();
 		if(ESP_DrawWeapon)
 			ESP_DrawWeapons();
+		if(ESP_Snaplines)
+			ESP_DrawSnaplines();
 	}
 
 }
@@ -1166,6 +1208,9 @@ void ESP_Menu()
 	strncat(buf_esp, "\n^5", sizeof(buf_esp));
 	strncat(buf_esp, "^5Weapons[Multiply]: ", sizeof(buf_esp));
 	strncat(buf_esp, GetBoolInChar(ESP_DrawWeapon), sizeof(buf_esp));
+	strncat(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat(buf_esp, "Snaplines[,]: ", sizeof(buf_esp));
+	strncat(buf_esp, GetBoolInChar(ESP_Snaplines), sizeof(buf_esp));
 	strncat(buf_esp, "\n^5", sizeof(buf_esp));
 		if(ESPMenu_Enabled)
 			DrawTextMW3(10, 190, RegisterFont(FONT_BIG_DEV),ColorWhite,buf_esp);
@@ -1213,7 +1258,7 @@ void Menu()
 {
 
 	char buf[4096];
-	sprintf(buf, "^2SN7313! ^3Public ^1ver 1.0\n");
+	sprintf(buf, "^2SN7313! ^3Private ^1ver 1.1\n");
 	strncat(buf, "^5ESP[F3]: ", sizeof(buf));
 	strncat(buf, GetBoolInChar(ESPEnabled), sizeof(buf));
 	strncat(buf, "\n^5", sizeof(buf));
@@ -1518,6 +1563,11 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			if (GetAsyncKeyState(VK_MULTIPLY))
 			{
 				ESP_DrawWeapon = GetState(ESP_DrawWeapon);
+				Sleep(100);
+			}
+			if (GetAsyncKeyState(VK_DECIMAL))
+			{
+				ESP_Snaplines = GetState(ESP_Snaplines);
 				Sleep(100);
 			}
 		}
