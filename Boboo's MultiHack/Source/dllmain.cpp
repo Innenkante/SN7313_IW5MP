@@ -12,7 +12,7 @@ bool GrabGuidEnabled = false;
 bool ESPEnabled = false;
 bool ESPMenu_Enabled = false;
 //ESPConfigMenu Values
-bool ESP_DrawBox = false;
+bool ESP_DrawCirlce = false;
 bool ESP_DrawBones = true;
 bool ESP_DrawName = true;
 bool ESP_DrawClientNum = false;
@@ -39,12 +39,12 @@ vec4_t ColorOrange = { 255.f, 165.f, 0.0f,1.0f };
 
 void* Font_Menu_GUID;
 
-char* Bones_Collection[20] =
+char* Bones_Collection[21] =
 {
 	"j_helmet"     , "j_head"         , "j_neck"
 	, "j_shoulder_le", "j_shoulder_ri"  , "j_elbow_le"   , "j_elbow_ri", "j_wrist_le", "j_wrist_ri", "j_gun"
 	, "j_mainroot"   , "j_spineupper"   , "pelvis" , "j_spine4"
-	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le"
+	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le","Best_bone",
 };
 
 DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
@@ -151,7 +151,7 @@ void ChangeName()
 	int random = rand() % 100;
 	char* name = (char*)PLAYERNAMEOFF;
 	char newname[16];
-	sprintf(newname, "Scrub %d", random);
+	sprintf_s(newname, "Scrub %d", random);
 	for (int i = 0; i < 16; i++)
 		name[i] = newname[i];
 }
@@ -226,7 +226,7 @@ char* GetPlayerName()
 {
 	const char* Name = (const char*)PLAYERNAMEOFF;
 	char buf[32] = "";
-	sprintf(buf, Name);
+	sprintf_s(buf, Name);
 	return buf;
 }
 
@@ -234,7 +234,7 @@ char* GetPlayerID()
 {
 	int* ID = (int*)XUIDOFF;
 	char buf[16];
-	sprintf(buf, "%ld", *ID);
+	sprintf_s(buf, "%ld", *ID);
 	return buf;
 }
 
@@ -242,7 +242,7 @@ char* GetServerName()
 {
 	const char* ServerName = (const char*)SERVERNAMEOFF;
 	char buf[64] = "";
-	sprintf(buf, ServerName);
+	sprintf_s(buf, ServerName);
 	return buf;
 }
 
@@ -250,7 +250,7 @@ char* GetServerIP()
 {
 	const char* ServerIP = (const char*)SERVERIPOFF;
 	char buf[32] = "";
-	sprintf(buf, ServerIP);
+	sprintf_s(buf, ServerIP);
 	return buf;
 }
 
@@ -293,9 +293,9 @@ void ForceJugg()
 	char buffer[1024];
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (CLIENTSIZE * cg->ClientNumber));
 	if (LocalClient->Team == 1)
-		sprintf(buffer, "cmd mr %d 9 allies", *MagicNum);
+		sprintf_s(buffer, "cmd mr %d 9 allies", *MagicNum);
 	if(LocalClient->Team == 2)
-		sprintf(buffer, "cmd mr %d 9 axis", *MagicNum);
+		sprintf_s(buffer, "cmd mr %d 9 axis", *MagicNum);
 	SendCommandToConsole(buffer);
 
 }
@@ -307,16 +307,16 @@ void ChangeTeam()
 	char buffer[1024];
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + CLIENTSIZE * cg->ClientNumber);
 	if(LocalClient->Team == 1)
-		sprintf(buffer, "cmd mr %d 2 allies", *MagicNum);
+		sprintf_s(buffer, "cmd mr %d 2 allies", *MagicNum);
 	if(LocalClient->Team == 2)
-		sprintf(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
+		sprintf_s(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
 	SendCommandToConsole(buffer);
 }
 
 void CallCrashVote()
 {
 	char buffer[1024];
-	sprintf(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
+	sprintf_s(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
 	SendCommandToConsole(buffer);
 }
 
@@ -348,6 +348,11 @@ void DrawShader(float x, float y, float w, float h, vec4_t Color, char* Shader)
 {
 	DrawRotatedPic_(GetScreenMatrix_(), x, y, w, h, 0, ColorWhite, RegisterShader(Shader));
 }
+void DrawShader2(float x, float y, float w, float h, vec4_t Color, int* Shader)
+{
+	DrawRotatedPic_(GetScreenMatrix_(), x, y, w, h, 0, ColorWhite, Shader);
+}
+
 
 void DrawCrossHair()
 {
@@ -541,9 +546,21 @@ int TraceToTarget(float *TargetVector)
 	return 0;
 }
 
+float TraceToTargetFraction(float *TargetVector)
+{
+	CG_T* CG = (CG_T*)CGOFF;
+	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+	Trace_t tr;
+	vec3_t NullVec = { 0,0,0 };
+	vec3_t start = { RefDef->Origin.x,RefDef->Origin.y,RefDef->Origin.z };
+	Trace(&tr, start, TargetVector, CG->ClientNumber, 0x803003);
+	return tr.fraction;
+}
+
+
 weapon_t* GetWeapon(int WeaponID)
 {
-	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
+	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID); 
 }
 
 void Shoot()
@@ -607,6 +624,7 @@ void DoAimbot(char* Bone,int AimType)
 					{
 						ClosestPlayerClientNumber = Entity[i]->ClientNumber;
 						ClosestDistance = CurrentDistance;
+						
 					}
 				}
 				continue;
@@ -683,7 +701,6 @@ void DoAimbot(char* Bone,int AimType)
 		}
 	}
 
-
 	if (ClosestPlayerClientNumber == -1)
 		return;
 	float AimAt[3];
@@ -696,12 +713,12 @@ void DoAimbot(char* Bone,int AimType)
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 	weapon_t* Weapon = GetWeapon(Entity[cg->ClientNumber]->WeaponID);
-	if (strstr(Weapon->weaponmodel, "l96a1") || strstr(Weapon->weaponmodel, "msr"))
+	if (strstr(Weapon->modelName ,"l96a1") || strstr(Weapon->modelName, "msr"))
 		return;
 	Shoot();
 }
 
-void DrawCirlce(Vector3D Position, float radius, vec4_t Color)
+void DrawCirlceSplashDamage(Vector3D Position, float radius, vec4_t Color)
 {
 	for (int i = 1; i <= 360; i++)
 	{
@@ -714,6 +731,18 @@ void DrawCirlce(Vector3D Position, float radius, vec4_t Color)
 		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadius, ScreenPositionRadiusPos);
 
 		DrawLine(ScreenPosPosition[0], ScreenPosPosition[1], ScreenPositionRadiusPos[0], ScreenPositionRadiusPos[1], Color, RegisterShader("white"), 5);
+	}
+}
+
+void DrawCirlceOnScreen(Vector2D Position, float radius, vec4_t Color)
+{
+	for (int i = 1; i <= 360; i+=10)
+	{
+		int x = i + 10;
+		Vector2D PositionOld(Position.x + (radius * cos(i * PI / 180)), Position.y + (radius * sin(i * PI / 180)));
+		Vector2D PositionNew(Position.x + (radius * cos(x * PI / 180)), Position.y + (radius * sin(x * PI / 180)));
+		
+		DrawLine(PositionOld.x, PositionOld.y, PositionNew.x, PositionNew.y, Color, RegisterShader("white"), 1);
 	}
 }
 
@@ -732,15 +761,15 @@ void ESP_DrawWeapons()
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponname != NULL)
+			if (Weapon->weaponName != NULL)
 			{
 				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
-				if (Weapon->weaponname[17] == 'B' && Weapon->weaponname[18] == 'A' && Weapon->weaponname[19] == 'G')
+				if (Weapon->weaponName[17] == 'B' && Weapon->weaponName[18] == 'A' && Weapon->weaponName[19] == 'G')
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
 				else
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponname);
+					DrawShader2(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponShader);
 			}
 		}
 		if (Entity[i]->Type == Entity_Type::Player_Corpse)
@@ -754,12 +783,13 @@ void ESP_DrawWeapons()
 		}
 		if (Entity[i]->Type == Entity_Type::Turret)
 		{
+			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 			float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
-			DrawShader(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "compassping_sentry_enemy");
+			DrawShader2(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->weaponShader);
 			
 		}
 		if (Entity[i]->Type == Entity_Type::Explosive)
@@ -768,31 +798,52 @@ void ESP_DrawWeapons()
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponname != NULL)
+			if (Weapon->weaponName != NULL)
 			{
 				//Look here : http://denkirson.proboards.com/thread/4482 and here http://gaming.stackexchange.com/questions/118448/grenade-blast-radius
-				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
-				if (strstr(Weapon->weaponmodel, "frag_grenade_mp"))
+				if (strstr(Weapon->modelName, "frag_grenade_mp") || strstr(Weapon->modelName,"semtex"))
 				{
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_grenadeicon");
-					DrawCirlce(Entity[i]->Origin, 248.031,ColorRed); //6,3 meters in inch; 
+					DrawShader2(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->weaponShader);
+					DrawCirlceSplashDamage(Entity[i]->Origin, 248.031,ColorRed); //6,3 meters in inch; 
 				}
-				if (strstr(Weapon->weaponmodel, "flash_grenade_mp"))
+				if (strstr(Weapon->modelName, "flash_grenade_mp"))
 				{
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_flashbangicon");
-					DrawCirlce(Entity[i]->Origin, 708.661, ColorOrange);
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "hud_flashbangicon");
+					DrawCirlceSplashDamage(Entity[i]->Origin, 708.661, ColorOrange);
 				}
-				if (strstr(Weapon->weaponmodel, "throwingknife_mp"))
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "equipment_throwing_knife");
-				if (strstr(Weapon->weaponmodel, "smoke_grenade_mp"))
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_smokegrenade");
-				if (strstr(Weapon->weaponmodel, "concussion_grenade_mp"))
+				if (strstr(Weapon->modelName, "throwingknife_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "equipment_throwing_knife");
+				if (strstr(Weapon->modelName, "smoke_grenade_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_smokegrenade");
+				if (strstr(Weapon->modelName, "concussion_grenade_mp"))
 				{
-					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_concgrenade");
-					DrawCirlce(Entity[i]->Origin, 472.441, ColorOrange);
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_concgrenade");
+					DrawCirlceSplashDamage(Entity[i]->Origin, 472.441, ColorOrange);
 				}
+			}
+		}
+		if (Entity[i]->Type == Entity_Type::Helicopter)
+		{
+			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
+			float ScreenPos[2];
+			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
+			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
+			if (Weapon->weaponName != NULL)
+			{
+				DrawShader2(ScreenPos[0], ScreenPos[1], 80 , 60 , ColorWhite, Weapon->weaponShader);
+			}
+		}
+		if (Entity[i]->Type == Entity_Type::Plane)
+		{
+			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
+			float ScreenPos[2];
+			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
+			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
+			if (Weapon->weaponName != NULL)
+			{
+				DrawShader2(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
 			}
 		}
 	}
@@ -1108,7 +1159,7 @@ void ESP_ColorBones()
 
 }
 
-void ESP_Draw2DBoxes()
+void ESP_Draw2DCircle()
 {
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -1134,36 +1185,17 @@ void ESP_Draw2DBoxes()
 			float TagPos_head[3];
 			float Screen_head[2];
 
-			float TagPos_shoulder_r[3];
-			float TagPos_shoulder_l[3];
-
-			float Screen_shoulder_r[2];
-			float Screen_shoulder_l[2];
-
-
-			float TagPos_ankle_r[3];
-			float TagPos_ankle_l[3];
-
-			float Screen_ankle_r[2];
-			float Screen_ankle_l[2];
+			float TagPos_MainRoot[3];
+			float Screen_MainRoot[2];
 
 			GetTagPos(Entity[i], "j_head", TagPos_head);
+			GetTagPos(Entity[i], "j_mainroot", TagPos_MainRoot);
 
-			GetTagPos(Entity[i], "j_shoulder_ri", TagPos_shoulder_r);
-			GetTagPos(Entity[i], "j_shoulder_le", TagPos_shoulder_l);
-
-			GetTagPos(Entity[i], "j_ankle_ri", TagPos_ankle_r);
-			GetTagPos(Entity[i], "j_ankle_le", TagPos_ankle_l);
 
 			ScreenMatrix* Matrix = GetScreenMatrix_();
 
-			WorldToScreen_(0x0, Matrix, TagPos_shoulder_r, Screen_shoulder_r);
-			WorldToScreen_(0x0, Matrix, TagPos_shoulder_l, Screen_shoulder_l);
-			WorldToScreen_(0x0, Matrix, TagPos_ankle_r, Screen_ankle_r);
-			WorldToScreen_(0x0, Matrix, TagPos_ankle_l, Screen_ankle_l);
-
 			WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
-
+			WorldToScreen_(0x0, Matrix, TagPos_MainRoot, Screen_MainRoot);
 			float distance = GetDistance(refdef->Origin, ParseVec(TagPos_head));
 
 			char buf_Name[1024];
@@ -1173,12 +1205,12 @@ void ESP_Draw2DBoxes()
 			char buf_Score[1024];
 			char buf_GUID[1024];
 
-			sprintf(buf_Name, "^3 %s ", Clients[i]->Name);
-			sprintf(buf_ClientNum, "^3Slot: ^1 %d", Entity[i]->ClientNumber);
-			sprintf(buf_Distance, "Dist: %d", (int)distance);
-			sprintf(buf_Rank, "Rank: %d", Clients[i]->Rank + 1); //Rank starts at -1 so rank 80 = 79 internal
-			sprintf(buf_Score, "Score: %d", Clients[i]->Score);
-			sprintf(buf_GUID, "^3GUID: ^1 %d", GetGUID(i));
+			sprintf_s(buf_Name, "^3 %s ", Clients[i]->Name);
+			sprintf_s(buf_ClientNum, "^3Slot: ^1 %d", Entity[i]->ClientNumber);
+			sprintf_s(buf_Distance, "Dist: %d", (int)distance);
+			sprintf_s(buf_Rank, "Rank: %d", Clients[i]->Rank + 1); //Rank starts at -1 so rank 80 = 79 internal
+			sprintf_s(buf_Score, "Score: %d", Clients[i]->Score);
+			sprintf_s(buf_GUID, "^3GUID: ^1 %d", GetGUID(i));
 
 
 			if (ESP_DrawName)
@@ -1194,17 +1226,17 @@ void ESP_Draw2DBoxes()
 			if (ESP_DrawGUID)
 				DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 48, RegisterFont(FONT_SMALL_DEV), ColorWhite, buf_GUID); //GUID
 
-			if (ESP_DrawBox)
+			if (ESP_DrawCirlce)
 			{
 				if (DeathMatch)
 				{
-					DrawRectangle(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_ankle_r[0], Screen_ankle_r[1], Screen_ankle_l[0], Screen_ankle_l[1],ColorRed,RegisterShader("white"),2);
+					DrawCirlceOnScreen(ParsVec(Screen_MainRoot), GetDistance(ParsVec(Screen_MainRoot), ParsVec(Screen_head)), ColorRed);
 					continue;
 				}
 				if (Clients[i]->Team == LocalClient->Team)
-					DrawRectangle(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_ankle_r[0], Screen_ankle_r[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, RegisterShader("white"), 2);
+					DrawCirlceOnScreen(ParsVec(Screen_MainRoot), GetDistance(ParsVec(Screen_MainRoot), ParsVec(Screen_head)), ColorGreen);
 				else
-					DrawRectangle(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_ankle_r[0], Screen_ankle_r[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, RegisterShader("white"), 2); 
+					DrawCirlceOnScreen(ParsVec(Screen_MainRoot), GetDistance(ParsVec(Screen_MainRoot), ParsVec(Screen_head)), ColorRed);
 			}
 		}
 	}
@@ -1223,8 +1255,8 @@ void ESP_Main()
 {
 	if (ESPEnabled)
 	{
-		if(ESP_Draw2DBoxes)
-			ESP_Draw2DBoxes();
+		if(ESP_DrawCirlce)
+			ESP_Draw2DCircle();
 		if (ESP_DrawBones)
 			ESP_ColorBones();
 		if (ESP_Draw3DBox)
@@ -1240,40 +1272,40 @@ void ESP_Main()
 void ESP_Menu()
 {
 	char buf_esp[4096];
-	sprintf(buf_esp, "^2ESP ^3Menu \n");
-	strncat(buf_esp, "^5Boxes[1]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawBox), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Bones[2]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawBones), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Name[3]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawName), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5ClientNum[4]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawClientNum), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Distance[5]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawDistance), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Rank[6]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawRank), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Score[7]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawScore), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5GUID[8]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawGUID), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^53DBoxes[9]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_Draw3DBox), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "^5Weapons[Multiply]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_DrawWeapon), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
-	strncat(buf_esp, "Snaplines[,]: ", sizeof(buf_esp));
-	strncat(buf_esp, GetBoolInChar(ESP_Snaplines), sizeof(buf_esp));
-	strncat(buf_esp, "\n^5", sizeof(buf_esp));
+	sprintf_s(buf_esp, "^2ESP ^3Menu \n");
+	strncat_s(buf_esp, "^5Circles[1]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawCirlce), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Bones[2]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawBones), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Name[3]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawName), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5ClientNum[4]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawClientNum), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Distance[5]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawDistance), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Rank[6]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawRank), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Score[7]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawScore), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5GUID[8]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawGUID), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^53DBoxes[9]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_Draw3DBox), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "^5Weapons[Multiply]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_DrawWeapon), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
+	strncat_s(buf_esp, "Snaplines[,]: ", sizeof(buf_esp));
+	strncat_s(buf_esp, GetBoolInChar(ESP_Snaplines), sizeof(buf_esp));
+	strncat_s(buf_esp, "\n^5", sizeof(buf_esp));
 		if(ESPMenu_Enabled)
 			DrawTextMW3(10, 190, RegisterFont(FONT_BIG_DEV),ColorWhite,buf_esp);
 
@@ -1287,7 +1319,7 @@ char* GetBone(int id)
 char* GetFieldOfAim(int field)
 {
 	char foo[64];
-	sprintf(foo, "%d", field);
+	sprintf_s(foo, "%d", field);
 	return foo;
 }
 
@@ -1295,84 +1327,120 @@ char* GetAimType(int type)
 {
 	char foo[64];
 	if (type == AimbotType::Closest)
-		sprintf(foo, "Closest to position");
+		sprintf_s(foo, "Closest to position");
 	if (type == AimbotType::InScreenRange)
-		sprintf(foo, "Closest to view");
+		sprintf_s(foo, "Closest to view");
 	return foo;
 }
 
 void Aim_Menu()
 {
 	char buf_aim[1024];
-	sprintf(buf_aim, "^2Aimbot ^3Menu \n");
-	strncat(buf_aim, "^5Aimbot Type [/]: ^2", sizeof(buf_aim));
-	strncat(buf_aim, GetAimType(currentaimtype), sizeof(buf_aim));
-	strncat(buf_aim, "\n^5Bone[<-||->]: ^2", sizeof(buf_aim));
-	strncat(buf_aim, GetBone(CurrentAimBonePosition), sizeof(buf_aim));
-	strncat(buf_aim, "\n^5Field of Aim[+|-]: ^2", sizeof(buf_aim));
-	strncat(buf_aim, GetFieldOfAim(FieldOfAim), sizeof(buf_aim));
-	strncat(buf_aim, "\n",sizeof(buf_aim));
+	sprintf_s(buf_aim, "^2Aimbot ^3Menu \n");
+	strncat_s(buf_aim, "^5Aimbot Type [/]: ^2", sizeof(buf_aim));
+	strncat_s(buf_aim, GetAimType(currentaimtype), sizeof(buf_aim));
+	strncat_s(buf_aim, "\n^5Bone[<-||->]: ^2", sizeof(buf_aim));
+	strncat_s(buf_aim, GetBone(CurrentAimBonePosition), sizeof(buf_aim));
+	strncat_s(buf_aim, "\n^5Field of Aim[+|-]: ^2", sizeof(buf_aim));
+	strncat_s(buf_aim, GetFieldOfAim(FieldOfAim), sizeof(buf_aim));
+	strncat_s(buf_aim, "\n",sizeof(buf_aim));
 	if(AimbotMenu_Enabled)
 		DrawTextMW3(10, 190, RegisterFont(FONT_BIG_DEV), ColorWhite, buf_aim);
+}
+
+int AddIconToText(int startLen, int* shader, char* text, float iconW, float iconH, BOOL flipIconHorizontal)
+{
+	DWORD dwFunc = 0x5AE5D0;
+	__asm
+	{
+		push flipIconHorizontal
+		push iconH
+		push iconW
+		mov edi, text
+		mov ebx, shader
+		mov eax, startLen
+		call dwFunc
+	}
+}
+
+char* GetIconText(int* shader, float iconW, float iconH, BOOL flipIconHorizontal)
+{
+	static char Buf[512];
+	memset(Buf, 0, 512);
+
+	int end = AddIconToText(0, shader, Buf, iconW, iconH, flipIconHorizontal);
+	Buf[end] = 0;
+	return Buf;
+}
+
+void DrawTestStuff()
+{
+	int* icon = RegisterShader("killiconheadshot");
+
+	char Buf[512];
+	sprintf_s(Buf, "Test %s", GetIconText(icon, 3.f, 1.8f, TRUE));
+
+	DrawTextMW3(100, 100, RegisterFont(FONT_BIG_DEV), ColorWhite, Buf);
 }
 
 void Menu()
 {
 
 	char buf[4096];
-	sprintf(buf, "^2SN7313! ^3Private ^1ver 1.1\n");
-	strncat(buf, "^5ESP[F3]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(ESPEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Aimbot[Down]:", sizeof(buf));
-	strncat(buf, GetBoolInChar(Aimbot_Enabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "No Recoil[F4]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(NoRecoilEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "No Spread[F5]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(NoSpreadEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Fullbright[F6]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(FullBrightEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Second radar[F7]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(RadarEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Laser[F8]: ", sizeof(buf));
-	strncat(buf, GetBoolInChar(LaserEnabled), sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Unlock Classes[F9]", sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Change Credentials[F10]", sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "ChangeTeam[F11]", sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Force Juggernaut[F12]", sizeof(buf));
-	strncat(buf, "\n^5",sizeof(buf));
-	strncat(buf, "Crash Vote[END]", sizeof(buf));
-	strncat(buf, "\n^5", sizeof(buf));
-	strncat(buf, "Show player IDs[INSERT]", sizeof(buf));
-	strncat(buf, "\n^3", sizeof(buf));
+	sprintf_s(buf, "^2SN7313! ^3Private ^1ver 1.1\n");
+	strncat_s(buf, "^5ESP[F3]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(ESPEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Aimbot[Down]:", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(Aimbot_Enabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "No Recoil[F4]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(NoRecoilEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "No Spread[F5]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(NoSpreadEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Fullbright[F6]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(FullBrightEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Second radar[F7]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(RadarEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Laser[F8]: ", sizeof(buf));
+	strncat_s(buf, GetBoolInChar(LaserEnabled), sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Unlock Classes[F9]", sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Change Credentials[F10]", sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "ChangeTeam[F11]", sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Force Juggernaut[F12]", sizeof(buf));
+	strncat_s(buf, "\n^5",sizeof(buf));
+	strncat_s(buf, "Crash Vote[END]", sizeof(buf));
+	strncat_s(buf, "\n^5", sizeof(buf));
+	strncat_s(buf, "Show player IDs[INSERT]", sizeof(buf));
+	strncat_s(buf, "\n^3", sizeof(buf));
 	//Other stuff:
-	strncat(buf, "Name: ^:", sizeof(buf));
-	strncat(buf, GetPlayerName(), sizeof(buf));
-	strncat(buf, "\n^3", sizeof(buf));
-	strncat(buf, "ID: ^:", sizeof(buf));
-	strncat(buf, GetPlayerID(), sizeof(buf));
-	strncat(buf, "\n^3", sizeof(buf));
-	strncat(buf, "Servername: ^;", sizeof(buf));
-	strncat(buf, GetServerName(), sizeof(buf));
-	strncat(buf, "\n^3", sizeof(buf));
-	strncat(buf, "Server IP: ^;", sizeof(buf));
-	strncat(buf, GetServerIP(), sizeof(buf));
-	strncat(buf, "\n", sizeof(buf));
+	strncat_s(buf, "Name: ^:", sizeof(buf));
+	strncat_s(buf, GetPlayerName(), sizeof(buf));
+	strncat_s(buf, "\n^3", sizeof(buf));
+	strncat_s(buf, "ID: ^:", sizeof(buf));
+	strncat_s(buf, GetPlayerID(), sizeof(buf));
+	strncat_s(buf, "\n^3", sizeof(buf));
+	strncat_s(buf, "Servername: ^;", sizeof(buf));
+	strncat_s(buf, GetServerName(), sizeof(buf));
+	strncat_s(buf, "\n^3", sizeof(buf));
+	strncat_s(buf, "Server IP: ^;", sizeof(buf));
+	strncat_s(buf, GetServerIP(), sizeof(buf));
+	strncat_s(buf, "\n", sizeof(buf));
 
 	//Fucking ugly but hey it works
 	
 	if (MenuEnabled)
 	{
 		DrawTextMW3(550, 30, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
+		DrawTestStuff();
 	}
 }
 
@@ -1540,7 +1608,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		{
 			if (GetAsyncKeyState(VK_RIGHT))
 			{
-				if (CurrentAimBonePosition == 19)
+				if (CurrentAimBonePosition == 20)
 					CurrentAimBonePosition = 0;
 				else
 					CurrentAimBonePosition++;
@@ -1549,7 +1617,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			if (GetAsyncKeyState(VK_LEFT))
 			{
 				if (CurrentAimBonePosition == 0)
-					CurrentAimBonePosition = 19;
+					CurrentAimBonePosition = 20;
 				else
 					CurrentAimBonePosition--;
 				Sleep(100);
@@ -1564,14 +1632,10 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			}
 			if (GetAsyncKeyState(VK_DIVIDE))
 			{
-				if (currentaimtype == AimbotType::Closest)
-				{
-					currentaimtype = AimbotType::InScreenRange;
-				}
+				if (currentaimtype == 2)
+					currentaimtype = 1;
 				else
-				{
-					currentaimtype = AimbotType::Closest;
-				}
+					currentaimtype++;
 				Sleep(100);
 			}
 		}
@@ -1579,7 +1643,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		{
 			if (GetAsyncKeyState(VK_NUMPAD1)) //Boxes
 			{
-				ESP_DrawBox = GetState(ESP_DrawBox);
+				ESP_DrawCirlce = GetState(ESP_DrawCirlce);
 				Sleep(100);
 			}
 			if (GetAsyncKeyState(VK_NUMPAD2)) //Bones

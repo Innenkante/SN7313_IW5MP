@@ -227,20 +227,13 @@ typedef struct {
 	Key Reload;
 }Input_t;
 
-typedef struct
-{
-	char _pad0[1116];
-	float swayMultiplier;    //0x045C 
-	float swayMultiplierADS; //0x0460 
-}weaponInfo_t;
-
 typedef struct 
 {
-	char * weaponmodel;
-	weaponInfo_t * info;
-	char * weaponname;
-	char pad1[114];
-	int* shader;
+	const char * modelName;
+	void * m_weaponDef;
+	const char * weaponName;
+	char _pad[120];
+	int* weaponShader;
 }weapon_t;
 
 
