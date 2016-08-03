@@ -63,7 +63,8 @@ RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
 World2Screen_t WorldToScreen_ = (World2Screen_t)0x004e5fc0;
 RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
-bool(__cdecl* CL_IsEntityVisible)(int, int*) = (bool(__cdecl*)(int, int*))0x54E6D0;
+ProcessCMD ProcessCMD_ = (ProcessCMD)0x429920;
+bool(__cdecl* CL_IsEntityVisible)(int, int*) = (bool(__cdecl*)(int, int*))0x54E6D0; //Thankt to kenny
 
 
 bool GetState(bool state)
@@ -316,8 +317,12 @@ void ChangeTeam()
 void CallCrashVote()
 {
 	char buffer[1024];
-	sprintf_s(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
+	sprintf_s(buffer,"map_rotate"); //Sometime is crashes the server when g_allowvote 1
 	SendCommandToConsole(buffer);
+	/*int* MagicNum = (int*)MATCHIDOFF;
+	char buf[128];*/
+	//sprintf_s(buf, "map_ro", *MagicNum);
+	//ProcessCMD_(0, buf);
 }
 
 int GetGUID(int index)
@@ -573,6 +578,7 @@ void Shoot()
 
 void DoAimbot(char* Bone,int AimType)
 {
+	 
 	if (!Aimbot_Enabled)
 		return;
 
@@ -587,6 +593,9 @@ void DoAimbot(char* Bone,int AimType)
 	float TagPos_bone[3];
 	float Screen_bone[2];
 	bool DeathMatch = false;
+
+	
+
 
 	if (cgs->GameType[0] == 'd' && cgs->GameType[1] == 'm')
 	{
@@ -619,6 +628,8 @@ void DoAimbot(char* Bone,int AimType)
 					if (!TraceToTarget(TagPos_bone))
 						continue;
 
+					
+
 					float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
 					if (CurrentDistance < ClosestDistance)
 					{
@@ -635,8 +646,10 @@ void DoAimbot(char* Bone,int AimType)
 
 				if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 					continue;
+
 				if (!IsVisible(Entity[i]->ClientNumber))
 					continue;
+
 				float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
 				if (CurrentDistance < ClosestDistance)
 				{
@@ -701,10 +714,14 @@ void DoAimbot(char* Bone,int AimType)
 		}
 	}
 
+
+
+
 	if (ClosestPlayerClientNumber == -1)
 		return;
 	float AimAt[3];
 	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
+
 	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
 	
 	float* ViewX = (float*)0x0106389C;
@@ -718,19 +735,20 @@ void DoAimbot(char* Bone,int AimType)
 	Shoot();
 }
 
-void DrawCirlceSplashDamage(Vector3D Position, float radius, vec4_t Color)
+void DrawCirlceSplashDamage(Vector3D PositionNade, float radius, vec4_t Color)
 {
-	for (int i = 1; i <= 360; i++)
+	for (int i = 1; i <= 360; i+=10)
 	{
-		Vector3D PositionNew(Position.x + (radius * cos(i * PI / 180)), Position.y + (radius * sin(i * PI / 180)), Position.z);
-		float ScreenPosPosition[2];
-		float ScreenPositionRadiusPos[2];
-		float PositionNade[] = { Position.x,Position.y,Position.z };
-		float PositionNadeRadius[] = { PositionNew.x,PositionNew.y,PositionNew.z };
-		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNade, ScreenPosPosition);
-		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadius, ScreenPositionRadiusPos);
+		int x = i + 10;
+		float ScreenPositionOfRadiusOld[2];
+		float ScreenPositionOfRadiusNew[2];
 
-		DrawLine(ScreenPosPosition[0], ScreenPosPosition[1], ScreenPositionRadiusPos[0], ScreenPositionRadiusPos[1], Color, RegisterShader("white"), 5);
+		float PositionNadeRadiusOld[] = { PositionNade.x + (radius * cos(i * PI / 180)),PositionNade.y + (radius * sin(i * PI / 180)), PositionNade.z };
+		float PositionNadeRadiusNew[] = { PositionNade.x + (radius * cos(x * PI / 180)),PositionNade.y + (radius * sin(x * PI / 180)), PositionNade.z };
+		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadiusOld, ScreenPositionOfRadiusOld);
+		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadiusNew, ScreenPositionOfRadiusNew);
+
+		DrawLine(ScreenPositionOfRadiusOld[0], ScreenPositionOfRadiusOld[1], ScreenPositionOfRadiusNew[0], ScreenPositionOfRadiusNew[1], Color, RegisterShader("white"), 5);
 	}
 }
 
@@ -753,7 +771,7 @@ void ESP_DrawWeapons()
 	for (int i = 0; i < 2048; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
-		if (!Entity[i]->Valid)
+		if (!Entity[i]->Valid && !Entity[i]->IsAlive)
 			continue;
 		if (Entity[i]->Type == Entity_Type::Item)
 		{

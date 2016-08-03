@@ -13,6 +13,6 @@ typedef int* (*RegisterShader_t) (char* ShaderName);
 typedef ScreenMatrix* (*GetScreenMatrix_t)();
 typedef bool(*World2Screen_t)(int unknown, ScreenMatrix* w2scalc, float* vPoint, float* Screen);
 typedef int(__cdecl* RegisterTag_t)(char* Tag);
-
+typedef int(__cdecl* ProcessCMD)(int* Arg, char* CMD);
 
 

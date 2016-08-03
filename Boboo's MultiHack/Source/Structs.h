@@ -196,8 +196,21 @@ public:
 
 typedef struct
 {
-	float fraction;
-	char _0x004[44];
+	float fraction; //0x0000  
+	float surfaceDirection[3];
+	__int32 ID0367A628; //0x0010  
+	char unknown20[8]; //0x0014
+	__int32 hitType; //0x001C  
+	WORD entityNum; //0x0020  
+	char unknown34[6]; //0x0022
+	BYTE allsolid; //0x0028  
+	BYTE startsolid; //0x0029  
+	BYTE ID0367A828; //0x002A  
+	char unknown43[5]; //0x002B
+	float endpos[3];
+	BYTE ID0367AFA8; //0x003C  
+	char unknown61[3]; //0x003D
+	__int32 materialType; //0x0040 
 }Trace_t;//Size=0x002C
 
 
@@ -237,6 +250,17 @@ typedef struct
 }weapon_t;
 
 
-
+typedef struct
+{
+	int		worldEntNum;	// 00
+	int		skipNum;		// 04
+	float	power;			// 08
+	int		bulletType;		// 12
+	char	Buttons[4];		// 16
+	float vieworg[3];		// 28
+	float	start[3];			// 40
+	float	end[3];			// 28
+	float	viewDirection[3];	// 32
+}BulletTrace_t;
 
 
