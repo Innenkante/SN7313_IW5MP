@@ -536,7 +536,7 @@ int TraceToTarget(float *TargetVector)
 	vec3_t NullVec = { 0,0,0 };
 	vec3_t start = { RefDef->Origin.x,RefDef->Origin.y,RefDef->Origin.z };
 	Trace(&tr, start, TargetVector,CG->ClientNumber, 0x803003);
-	if (tr.fraction >= 1.0f)
+	if (tr.fraction >= 0.87f)
 		return 1;
 	return 0;
 }
@@ -593,10 +593,13 @@ void DoAimbot(char* Bone,int AimType)
 				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
 				{
 					
-					if (!IsVisible(Entity[i]->ClientNumber))
-						continue;
+					/*if (!IsVisible(Entity[i]->ClientNumber))
+						continue;*/
 
 					if (!GetTagPos(Entity[i], Bone, TagPos_bone))
+						continue;
+
+					if (!TraceToTarget(TagPos_bone))
 						continue;
 
 					float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
@@ -683,12 +686,8 @@ void DoAimbot(char* Bone,int AimType)
 
 	if (ClosestPlayerClientNumber == -1)
 		return;
-	std::ofstream TraceDump;
-	TraceDump.open("CG_TraceDump.txt");
 	float AimAt[3];
 	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
-	int x = TraceToTarget(AimAt);
-	TraceDump << x << std::endl;
 	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
 	
 	float* ViewX = (float*)0x0106389C;
@@ -704,7 +703,7 @@ void DoAimbot(char* Bone,int AimType)
 
 void DrawCirlce(Vector3D Position, float radius, vec4_t Color)
 {
-	for (int i = 0; i <= 360; i++)
+	for (int i = 1; i <= 360; i++)
 	{
 		Vector3D PositionNew(Position.x + (radius * cos(i * PI / 180)), Position.y + (radius * sin(i * PI / 180)), Position.z);
 		float ScreenPosPosition[2];
@@ -715,7 +714,6 @@ void DrawCirlce(Vector3D Position, float radius, vec4_t Color)
 		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadius, ScreenPositionRadiusPos);
 
 		DrawLine(ScreenPosPosition[0], ScreenPosPosition[1], ScreenPositionRadiusPos[0], ScreenPositionRadiusPos[1], Color, RegisterShader("white"), 5);
-
 	}
 }
 
