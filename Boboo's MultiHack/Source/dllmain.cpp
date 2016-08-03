@@ -151,7 +151,7 @@ void ChangeName()
 	int random = rand() % 100;
 	char* name = (char*)PLAYERNAMEOFF;
 	char newname[16];
-	sprintf(newname, "Rekter %d", random);
+	sprintf(newname, "Scrub %d", random);
 	for (int i = 0; i < 16; i++)
 		name[i] = newname[i];
 }
@@ -166,20 +166,6 @@ void RandomCreds()
 
 	ChangeName();
 }
-
-//void FixBlindPerks()
-//{
-//	ClientInfo_T* Clients[18];
-//	for (int i = 0; i < 18; i++)
-//	{
-//		Clients[i] = (ClientInfo_T*)(CLIENTOFF + ((int)CLIENTSIZE * i));
-//		if (Clients[i] != Clients[*(int*)0x8FF250])
-//		{
-//			if (Clients[i]->Perk & 0x20 || Clients[i]->Perk & 0x40)
-//				Clients[i]->Perk = 0x0;
-//		}
-//	}
-//}
 
 void FullBright(bool state)
 {
@@ -267,24 +253,6 @@ char* GetServerIP()
 	sprintf(buf, ServerIP);
 	return buf;
 }
-
-
-//void ChopperBoxes()
-//{
-//	DWORD dwCall = 0x5AA470;
-//	if (WhEnabled)
-//	{
-//		FixBlindPerks();
-//		__asm
-//		{
-//			push 0x0;
-//			call[dwCall];
-//			add esp, 0x4;
-//		}
-//	}
-//	else
-//		return;
-//}
 
 void DrawRadar()
 {
@@ -376,6 +344,11 @@ void GrabGUID()
 	}
 }
 
+void DrawShader(float x, float y, float w, float h, vec4_t Color, char* Shader)
+{
+	DrawRotatedPic_(GetScreenMatrix_(), x, y, w, h, 0, ColorWhite, RegisterShader(Shader));
+}
+
 void DrawCrossHair()
 {
 	RefDef_T* refdef = (RefDef_T*)REFDEFOFF;
@@ -383,7 +356,6 @@ void DrawCrossHair()
 	if (!refdef->Width || !refdef->Height)
 		return;
 	DrawTextMW3(refdef->Width / 2 - 7 , refdef->Height / 2 + 10, RegisterFont(FONT_BIG_DEV), ColorGreen, "+"); //Maybe -6 and + 11? but atm it looks good doe
-
 }
 
 void DrawLine(float x1, float y1, float x2,float y2, vec4_t Color, int *Shader,int size) //Thx to Kenny I lub you <3
@@ -438,6 +410,13 @@ void Draw3DBox(Vector3D pos, float w, float h, vec4_t color, int* shader)
 	DrawLineFor3D(pos, w, w, h, -w, w, h, color, shader);
 }
 
+void DrawCirlce(Vector3D Position, float radius)
+{
+	for (int i = 0; i < 720; i++)
+	{
+
+	}
+}
 float GetDistance(Vector3D source, Vector3D destination)
 {
 	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2) + pow(destination.z - source.z, 2));
@@ -548,13 +527,29 @@ Vector2D CalcAngles(Vector3D src, Vector3D dest,Vector3D ViewAxis[3])
 	return angles;
 }
 
-//TODO Trying the Trace ( CG_Trace ) in the aimbot directly to see what happens then :) maybe it is just not thread safe and thats why it crashes
-
-
-
 bool IsVisible(int clientnum)
 {
 	return CL_IsEntityVisible(0, (int*)(0x00A08630 + (0x1F8 * (clientnum & 2047))));
+}
+
+typedef void(__cdecl* CG_Trace_t) (Trace_t* results, vec3_t start, vec3_t End, int passEntity, DWORD Mask);
+CG_Trace_t Trace = (CG_Trace_t)0x55A820;
+
+int TraceToTarget(float *TargetVector)
+{
+	CG_T* CG = (CG_T*)CGOFF;
+	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+	Trace_t tr;
+	vec3_t NullVec = { 0,0,0 };
+	Trace(&tr, ParseFloat(RefDef->Origin), TargetVector,CG->ClientNumber, 0x803003);
+	if (tr.fraction >= 1.0f)
+		return 1;
+	return 0;
+}
+
+weapon_t* GetWeapon(int WeaponID)
+{
+	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
 }
 
 void Shoot()
@@ -691,46 +686,91 @@ void DoAimbot(char* Bone,int AimType)
 		}
 	}
 
+
 	if (ClosestPlayerClientNumber == -1)
 		return;
 
 	float AimAt[3];
 	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
 	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
-
+	
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
 
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
-
+	weapon_t* Weapon = GetWeapon(Entity[cg->ClientNumber]->WeaponID);
+	if (strstr(Weapon->weaponmodel, "l96a1") || strstr(Weapon->weaponmodel, "msr"))
+		return;
 	Shoot();
 }
 
-weapon_t* GetWeapon(int WeaponID)
-{
-	
-	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
-}
-
-
 void ESP_DrawWeapons()
 {
-	Entity_T* Entity[1024];
-	std::ofstream WeaponESPDump;
-	WeaponESPDump.open("WeaponESPdump.txt");
-	for (int i = 0; i < 1024; i++)
+	Entity_T* Entity[2048];
+	float oldangle = 0;
+	for (int i = 0; i < 2048; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
+		if (!Entity[i]->Valid)
+			continue;
 		if (Entity[i]->Type == Entity_Type::Item)
 		{
 			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
+			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
+			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
+			if (Weapon->weaponname != NULL)
+			{
+				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
+				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+				float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
+				if (Weapon->weaponname[17] == 'B' && Weapon->weaponname[18] == 'A' && Weapon->weaponname[19] == 'G')
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
+				else
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponname);
+			}
+		}
+		if (Entity[i]->Type == Entity_Type::Player_Corpse)
+		{
+			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
+			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
+			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+			float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
+			DrawShader(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "headicon_dead");
+		}
+		if (Entity[i]->Type == Entity_Type::Turret)
+		{
+			float ScreenPos[2];
+			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
+			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
+			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+			float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
+			DrawShader(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "compassping_sentry_enemy");
+			
+		}
+		if (Entity[i]->Type == Entity_Type::Explosive)
+		{
+			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
+			float ScreenPos[2];
+			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
 			if (Weapon->weaponname != NULL)
 			{
 				DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
+				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+				float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
+				if(strstr(Weapon->weaponmodel,"frag_grenade_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_grenadeicon");
+				if (strstr(Weapon->weaponmodel, "flash_grenade_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_flashbangicon");
+				if (strstr(Weapon->weaponmodel, "throwingknife_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "equipment_throwing_knife");
+				if (strstr(Weapon->weaponmodel, "smoke_grenade_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_smokegrenade");
+				if (strstr(Weapon->weaponmodel, "concussion_grenade_mp"))
+					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_concgrenade");
 			}
 		}
 	}
@@ -1311,6 +1351,7 @@ void Menu()
 	if (MenuEnabled)
 	{
 		DrawTextMW3(550, 30, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
+		//DrawShader(100, 100, 100, 100, ColorWhite, "objective_friendly_chat");
 	}
 }
 
@@ -1364,7 +1405,6 @@ void AimbotWrapper()
 	DoAimbot(GetBone(CurrentAimBonePosition),currentaimtype);
 }
 
-
 DWORD dwJMPback = 0x430436;
 __declspec(naked) void hkDraw2D() //MPGH I lub you
 {
@@ -1383,6 +1423,7 @@ __declspec(naked) void hkDraw2D() //MPGH I lub you
 
 	__asm JMP[dwJMPback]
 }
+
 
 
 DWORD WINAPI _MainMethod(LPVOID lpParam)
@@ -1593,7 +1634,6 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 
 	return 1;
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {

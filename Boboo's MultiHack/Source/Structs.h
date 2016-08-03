@@ -198,7 +198,7 @@ typedef struct
 {
 	float fraction;
 	char _0x004[44];
-}Trace_t;
+}Trace_t;//Size=0x002C
 
 
 enum AimbotType

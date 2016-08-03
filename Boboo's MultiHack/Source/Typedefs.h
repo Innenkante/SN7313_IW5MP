@@ -1,5 +1,6 @@
 #pragma once
 typedef float vec_t;
+typedef vec_t vec3_t[3];
 typedef vec_t vec4_t[4];
 typedef int(*DrawEngineText_t)(char* Text, int NumOfChars, void* Font, float X, float Y, float scaleX, float scaleY, float unk1, vec4_t Color, int unk2);
 typedef int(*DrawRotatedPic_t)(ScreenMatrix* scmatrix, float x, float y, float w, float h, float angle, vec4_t color, int* shader);
