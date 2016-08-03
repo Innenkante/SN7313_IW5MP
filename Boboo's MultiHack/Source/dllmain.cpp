@@ -410,13 +410,6 @@ void Draw3DBox(Vector3D pos, float w, float h, vec4_t color, int* shader)
 	DrawLineFor3D(pos, w, w, h, -w, w, h, color, shader);
 }
 
-void DrawCirlce(Vector3D Position, float radius)
-{
-	for (int i = 0; i < 720; i++)
-	{
-
-	}
-}
 float GetDistance(Vector3D source, Vector3D destination)
 {
 	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2) + pow(destination.z - source.z, 2));
@@ -541,7 +534,8 @@ int TraceToTarget(float *TargetVector)
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 	Trace_t tr;
 	vec3_t NullVec = { 0,0,0 };
-	Trace(&tr, ParseFloat(RefDef->Origin), TargetVector,CG->ClientNumber, 0x803003);
+	vec3_t start = { RefDef->Origin.x,RefDef->Origin.y,RefDef->Origin.z };
+	Trace(&tr, start, TargetVector,CG->ClientNumber, 0x803003);
 	if (tr.fraction >= 1.0f)
 		return 1;
 	return 0;
@@ -689,9 +683,12 @@ void DoAimbot(char* Bone,int AimType)
 
 	if (ClosestPlayerClientNumber == -1)
 		return;
-
+	std::ofstream TraceDump;
+	TraceDump.open("CG_TraceDump.txt");
 	float AimAt[3];
 	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
+	int x = TraceToTarget(AimAt);
+	TraceDump << x << std::endl;
 	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
 	
 	float* ViewX = (float*)0x0106389C;
@@ -703,6 +700,23 @@ void DoAimbot(char* Bone,int AimType)
 	if (strstr(Weapon->weaponmodel, "l96a1") || strstr(Weapon->weaponmodel, "msr"))
 		return;
 	Shoot();
+}
+
+void DrawCirlce(Vector3D Position, float radius, vec4_t Color)
+{
+	for (int i = 0; i <= 360; i++)
+	{
+		Vector3D PositionNew(Position.x + (radius * cos(i * PI / 180)), Position.y + (radius * sin(i * PI / 180)), Position.z);
+		float ScreenPosPosition[2];
+		float ScreenPositionRadiusPos[2];
+		float PositionNade[] = { Position.x,Position.y,Position.z };
+		float PositionNadeRadius[] = { PositionNew.x,PositionNew.y,PositionNew.z };
+		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNade, ScreenPosPosition);
+		WorldToScreen_(0x0, GetScreenMatrix_(), PositionNadeRadius, ScreenPositionRadiusPos);
+
+		DrawLine(ScreenPosPosition[0], ScreenPosPosition[1], ScreenPositionRadiusPos[0], ScreenPositionRadiusPos[1], Color, RegisterShader("white"), 5);
+
+	}
 }
 
 void ESP_DrawWeapons()
@@ -758,19 +772,29 @@ void ESP_DrawWeapons()
 			WorldToScreen_(0x0, GetScreenMatrix_(), WorldPos, ScreenPos);
 			if (Weapon->weaponname != NULL)
 			{
-				DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
+				//Look here : http://denkirson.proboards.com/thread/4482 and here http://gaming.stackexchange.com/questions/118448/grenade-blast-radius
+				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = GetDistance(RefDef->Origin, ParseVec(WorldPos)) / 500;
-				if(strstr(Weapon->weaponmodel,"frag_grenade_mp"))
+				if (strstr(Weapon->weaponmodel, "frag_grenade_mp"))
+				{
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_grenadeicon");
+					DrawCirlce(Entity[i]->Origin, 248.031,ColorRed); //6,3 meters in inch; 
+				}
 				if (strstr(Weapon->weaponmodel, "flash_grenade_mp"))
+				{
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "hud_flashbangicon");
+					DrawCirlce(Entity[i]->Origin, 708.661, ColorOrange);
+				}
 				if (strstr(Weapon->weaponmodel, "throwingknife_mp"))
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "equipment_throwing_knife");
 				if (strstr(Weapon->weaponmodel, "smoke_grenade_mp"))
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_smokegrenade");
 				if (strstr(Weapon->weaponmodel, "concussion_grenade_mp"))
+				{
 					DrawShader(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "weapon_concgrenade");
+					DrawCirlce(Entity[i]->Origin, 472.441, ColorOrange);
+				}
 			}
 		}
 	}
@@ -1351,7 +1375,6 @@ void Menu()
 	if (MenuEnabled)
 	{
 		DrawTextMW3(550, 30, RegisterFont(FONT_BIG_DEV), ColorWhite, buf);
-		//DrawShader(100, 100, 100, 100, ColorWhite, "objective_friendly_chat");
 	}
 }
 
