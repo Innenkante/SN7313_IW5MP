@@ -317,8 +317,9 @@ void ChangeTeam()
 void CallCrashVote()
 {
 	char buffer[1024];
-	sprintf_s(buffer,"map_rotate"); //Sometime is crashes the server when g_allowvote 1
+	sprintf_s(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
 	SendCommandToConsole(buffer);
+	//TODO finish this shit tomorrow/try again to get some proper crasher done :S
 	/*int* MagicNum = (int*)MATCHIDOFF;
 	char buf[128];*/
 	//sprintf_s(buf, "map_ro", *MagicNum);
@@ -771,7 +772,7 @@ void ESP_DrawWeapons()
 	for (int i = 0; i < 2048; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
-		if (!Entity[i]->Valid && !Entity[i]->IsAlive)
+		if (!Entity[i]->Valid || !Entity[i]->IsAlive)
 			continue;
 		if (Entity[i]->Type == Entity_Type::Item)
 		{
