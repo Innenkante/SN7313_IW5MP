@@ -218,6 +218,7 @@ enum AimbotType
 {
 	Closest = 1,
 	InScreenRange = 2,
+	BestTrace = 3
 };
 
 typedef struct {

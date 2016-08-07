@@ -12,17 +12,17 @@ bool GrabGuidEnabled = false;
 bool ESPEnabled = false;
 bool ESPMenu_Enabled = false;
 //ESPConfigMenu Values
-bool ESP_DrawCirlce = false;
-bool ESP_DrawBones = true;
+bool ESP_DrawCirlce = true;
+bool ESP_DrawBones = false;
 bool ESP_DrawName = true;
 bool ESP_DrawClientNum = false;
 bool ESP_DrawRank = false;
-bool ESP_DrawDistance = true;
+bool ESP_DrawDistance = false;
 bool ESP_DrawScore = false;
 bool ESP_DrawGUID = false;
-bool ESP_Draw3DBox = true;
-bool ESP_DrawWeapon = true;
-bool ESP_Snaplines = true;
+bool ESP_Draw3DBox = false;
+bool ESP_DrawWeapon = false;
+bool ESP_Snaplines = false;
 
 bool AimbotMenu_Enabled = false;
 bool Aimbot_Enabled = false;
@@ -44,7 +44,7 @@ char* Bones_Collection[21] =
 	"j_helmet"     , "j_head"         , "j_neck"
 	, "j_shoulder_le", "j_shoulder_ri"  , "j_elbow_le"   , "j_elbow_ri", "j_wrist_le", "j_wrist_ri", "j_gun"
 	, "j_mainroot"   , "j_spineupper"   , "pelvis" , "j_spine4"
-	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le","Best_bone",
+	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le","j_eye_le"
 };
 
 DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
@@ -314,11 +314,17 @@ void ChangeTeam()
 	SendCommandToConsole(buffer);
 }
 
+
 void CallCrashVote()
 {
 	char buffer[1024];
-	sprintf_s(buffer,"callvote map_rotate"); //Sometime is crashes the server when g_allowvote 1
+	sprintf_s(buffer,"say Crash Try #Hacks"); //Sometime is crashes the server when g_allowvote 1
 	SendCommandToConsole(buffer);
+
+	char buffer2[1024];
+	sprintf_s(buffer2, "say %c %c %c",static_cast<char>(0x5E),static_cast<char>(0x02),static_cast<char>(0x00));
+	//SendCommandToConsole(buffer2);
+	ProcessCMD_(0, buffer2);
 	//TODO finish this shit tomorrow/try again to get some proper crasher done :S
 	/*int* MagicNum = (int*)MATCHIDOFF;
 	char buf[128];*/
@@ -539,7 +545,7 @@ bool IsVisible(int clientnum)
 typedef void(__cdecl* CG_Trace_t) (Trace_t* results, vec3_t start, vec3_t End, int passEntity, DWORD Mask);
 CG_Trace_t Trace = (CG_Trace_t)0x55A820;
 
-int TraceToTarget(float *TargetVector)
+bool TraceToTarget(float *TargetVector)
 {
 	CG_T* CG = (CG_T*)CGOFF;
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
@@ -547,9 +553,9 @@ int TraceToTarget(float *TargetVector)
 	vec3_t NullVec = { 0,0,0 };
 	vec3_t start = { RefDef->Origin.x,RefDef->Origin.y,RefDef->Origin.z };
 	Trace(&tr, start, TargetVector,CG->ClientNumber, 0x803003);
-	if (tr.fraction >= 0.87f)
-		return 1;
-	return 0;
+	if (tr.fraction >= 0.87f) //0.97f
+		return true;
+	return false;
 }
 
 float TraceToTargetFraction(float *TargetVector)
@@ -563,40 +569,57 @@ float TraceToTargetFraction(float *TargetVector)
 	return tr.fraction;
 }
 
+Trace_t TraceToTargetTraceStruct(float* TargetVector)
+{
+	CG_T* CG = (CG_T*)CGOFF;
+	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+	Trace_t tr;
+	vec3_t NullVec = { 0,0,0 };
+	vec3_t start = { RefDef->Origin.x,RefDef->Origin.y,RefDef->Origin.z };
+	Trace(&tr, start, TargetVector, CG->ClientNumber, 0x803003);
+	return tr;
+}
 
 weapon_t* GetWeapon(int WeaponID)
 {
 	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID); 
 }
 
+bool Shooting = false;
 void Shoot()
 {
 	byte* Scoped = (byte*)0x10603B0;
 	Input_t* Input = (Input_t*)0x00B39EE0;
 	*Scoped = 1;
-	Input->Weapon.Pressed = 1;
+	if(Shooting)
+		Input->Weapon.Pressed = 1;
+	Shooting = GetState(Shooting);
 }
 
-void DoAimbot(char* Bone,int AimType)
+char* GetBone(int id)
 {
-	 
+	return Bones_Collection[id];
+}
+
+void DoAimbot(char* Bone, int AimType)
+{
+
+
 	if (!Aimbot_Enabled)
 		return;
-
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 	CG_T* cg = (CG_T*)(CGOFF);
 	CGS_T* cgs = (CGS_T*)(CGSOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	Vector2D Angles(0, 0);
 	int ClosestPlayerClientNumber = -1;
 	float ClosestDistance = 999999999999.f;
 	float TagPos_bone[3];
 	float Screen_bone[2];
 	bool DeathMatch = false;
-
-	
-
+	int BestBoneID = -1;
 
 	if (cgs->GameType[0] == 'd' && cgs->GameType[1] == 'm')
 	{
@@ -609,19 +632,16 @@ void DoAimbot(char* Bone,int AimType)
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 	}
 
-	
+
 	if (AimType == AimbotType::Closest)
 	{
 		for (int i = 0; i < 18; i++)
 		{
-			
+
 			if (DeathMatch)
 			{
-				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
+				if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
 				{
-					
-					/*if (!IsVisible(Entity[i]->ClientNumber))
-						continue;*/
 
 					if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 						continue;
@@ -629,19 +649,18 @@ void DoAimbot(char* Bone,int AimType)
 					if (!TraceToTarget(TagPos_bone))
 						continue;
 
-					
+
 
 					float CurrentDistance = GetDistance(RefDef->Origin, ParseVec(TagPos_bone));
 					if (CurrentDistance < ClosestDistance)
 					{
 						ClosestPlayerClientNumber = Entity[i]->ClientNumber;
 						ClosestDistance = CurrentDistance;
-						
+
 					}
 				}
-				continue;
 			}
-			else if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive)
+			else if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Client[i]->Team != LocalClient->Team)
 			{
 
 
@@ -668,7 +687,7 @@ void DoAimbot(char* Bone,int AimType)
 		{
 			if (DeathMatch)
 			{
-				if (Client[i]->Valid && Entity[i]->Valid && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->ClientNumber != cg->ClientNumber)
+				if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
 				{
 					if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 						return;
@@ -690,9 +709,8 @@ void DoAimbot(char* Bone,int AimType)
 						}
 					}
 				}
-				continue;
 			}
-			if (Client[i]->Valid && Entity[i]->Valid && Client[i]->Team != LocalClient->Team && Entity[i]->IsAlive && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48)
+			else if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Client[i]->Team != LocalClient->Team)
 			{
 				if (!GetTagPos(Entity[i], Bone, TagPos_bone))
 					return;
@@ -714,27 +732,75 @@ void DoAimbot(char* Bone,int AimType)
 			}
 		}
 	}
-
-
-
+	if (AimType == AimbotType::BestTrace)
+	{
+		float BestTraceVal = 0.f;
+		for (int i = 0; i < 18; i++)
+		{
+			if (DeathMatch)
+			{
+				if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
+				{
+					for (int x = 0; x < 20; x++)
+					{
+						if (!GetTagPos(Entity[i], GetBone(x), TagPos_bone))
+							continue;
+						Trace_t tmptrace = TraceToTargetTraceStruct(TagPos_bone);
+						if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > 0.80)
+						{
+							BestBoneID = x;
+							BestTraceVal = tmptrace.fraction;
+							ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+						}
+					}
+				}
+			}
+			else if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Client[i]->Team != LocalClient->Team)
+			{
+				for (int x = 0; x < 20; x++)
+				{
+					if (!GetTagPos(Entity[i], GetBone(x), TagPos_bone))
+						continue;
+					Trace_t tmptrace = TraceToTargetTraceStruct(TagPos_bone);
+					if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > 0.80)
+					{
+						BestBoneID = x;
+						BestTraceVal = tmptrace.fraction;
+						ClosestPlayerClientNumber = Entity[i]->ClientNumber;
+					}
+				}
+			}
+		}
+	}
 
 	if (ClosestPlayerClientNumber == -1)
 		return;
 	float AimAt[3];
-	GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
 
-	Vector2D Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
-	
+	if (BestBoneID == -1)
+	{
+		GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
+	}
+	else
+	{
+		GetTagPos(Entity[ClosestPlayerClientNumber], GetBone(BestBoneID), AimAt);
+	}
+
+	Angles = CalcAngles(RefDef->Origin, ParseVec(AimAt), RefDef->ViewAxis);
+
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
 
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 	weapon_t* Weapon = GetWeapon(Entity[cg->ClientNumber]->WeaponID);
-	if (strstr(Weapon->modelName ,"l96a1") || strstr(Weapon->modelName, "msr"))
+	if (strstr(Weapon->modelName, "l96a1") || strstr(Weapon->modelName, "msr"))
 		return;
+	//ApplyNoSpread();
 	Shoot();
 }
+
+
 
 void DrawCirlceSplashDamage(Vector3D PositionNade, float radius, vec4_t Color)
 {
@@ -772,9 +838,9 @@ void ESP_DrawWeapons()
 	for (int i = 0; i < 2048; i++)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
-		if (!Entity[i]->Valid || !Entity[i]->IsAlive)
-			continue;
-		if (Entity[i]->Type == Entity_Type::Item)
+
+
+		if (Entity[i]->Type == Entity_Type::Item && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
@@ -887,7 +953,7 @@ void ESP_DrawSnaplines()
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 		RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
 		{
 			float TagPos[3];
 			float ScreenPos[2];
@@ -927,7 +993,7 @@ void ESP_Draw3DBoxes()
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
 		{
 			if (DeathMatch)
 			{
@@ -961,7 +1027,7 @@ void ESP_ColorBones()
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive && Entity[i]->Type == Entity_Type::Player && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Entity[i]->Valid && Client[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
 		{
 			//Legs
 			float TagPos_hip_r[3];
@@ -1199,7 +1265,7 @@ void ESP_Draw2DCircle()
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
 		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive &&  Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Entity[i]->IsAlive != 16 && Entity[i]->IsAlive != 48 && Clients[i]->Valid)
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 &&  Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
 		{
 			float TagPos_head[3];
 			float Screen_head[2];
@@ -1330,11 +1396,6 @@ void ESP_Menu()
 
 }
 
-char* GetBone(int id)
-{
-	return Bones_Collection[id];
-}
-
 char* GetFieldOfAim(int field)
 {
 	char foo[64];
@@ -1349,6 +1410,8 @@ char* GetAimType(int type)
 		sprintf_s(foo, "Closest to position");
 	if (type == AimbotType::InScreenRange)
 		sprintf_s(foo, "Closest to view");
+	if (type == AimbotType::BestTrace)
+		sprintf_s(foo, "Best Trace");
 	return foo;
 }
 
@@ -1532,13 +1595,16 @@ __declspec(naked) void hkDraw2D() //MPGH I lub you
 	__asm JMP[dwJMPback]
 }
 
-
-
 DWORD WINAPI _MainMethod(LPVOID lpParam)
 {
 	//My keyboardhook
 	while (true)
 	{
+		if (GetAsyncKeyState(VK_F1))
+		{
+			
+			Sleep(100);
+		}
 		if (GetAsyncKeyState(VK_F2)) //Menu
 		{
 			MenuEnabled = GetState(MenuEnabled);
@@ -1651,7 +1717,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			}
 			if (GetAsyncKeyState(VK_DIVIDE))
 			{
-				if (currentaimtype == 2)
+				if (currentaimtype == 3)
 					currentaimtype = 1;
 				else
 					currentaimtype++;
