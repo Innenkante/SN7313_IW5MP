@@ -39,12 +39,10 @@ vec4_t ColorOrange = { 255.f, 165.f, 0.0f,1.0f };
 
 void* Font_Menu_GUID;
 
-char* Bones_Collection[21] =
+char* Bones_Collection[] =
 {
-	"j_helmet"     , "j_head"         , "j_neck"
-	, "j_shoulder_le", "j_shoulder_ri"  , "j_elbow_le"   , "j_elbow_ri", "j_wrist_le", "j_wrist_ri", "j_gun"
-	, "j_mainroot"   , "j_spineupper"   , "pelvis" , "j_spine4"
-	, "j_hip_ri"     , "j_hip_le"       , "j_knee_le"    , "j_knee_ri" , "j_ankle_ri", "j_ankle_le","j_eye_le"
+	
+	"j_head","j_neck","j_spine4","tag_weapon_right","tag_weapon_left","j_wristtwist_ri","j_wristtwist_le","j_wrist_ri","j_wrist_le","j_shouldertwist_ri","j_shouldertwist_le","j_elbow_ri","j_elbow_le","j_shoulder_ri","j_shoulder_le","j_ankle_ri","j_ankle_le","j_knee_ri","j_knee_le","torso_stabilizer","j_hip_ri","j_hip_le","pelvis","j_mainroot",
 };
 
 DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
@@ -741,7 +739,7 @@ void DoAimbot(char* Bone, int AimType)
 			{
 				if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
 				{
-					for (int x = 0; x < 20; x++)
+					for (int x = 0; x < 24; x++)
 					{
 						if (!GetTagPos(Entity[i], GetBone(x), TagPos_bone))
 							continue;
@@ -757,7 +755,7 @@ void DoAimbot(char* Bone, int AimType)
 			}
 			else if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Client[i]->Team != LocalClient->Team)
 			{
-				for (int x = 0; x < 20; x++)
+				for (int x = 0; x < 24; x++)
 				{
 					if (!GetTagPos(Entity[i], GetBone(x), TagPos_bone))
 						continue;
@@ -1693,7 +1691,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 		{
 			if (GetAsyncKeyState(VK_RIGHT))
 			{
-				if (CurrentAimBonePosition == 20)
+				if (CurrentAimBonePosition == 24)
 					CurrentAimBonePosition = 0;
 				else
 					CurrentAimBonePosition++;
@@ -1702,7 +1700,7 @@ DWORD WINAPI _MainMethod(LPVOID lpParam)
 			if (GetAsyncKeyState(VK_LEFT))
 			{
 				if (CurrentAimBonePosition == 0)
-					CurrentAimBonePosition = 20;
+					CurrentAimBonePosition = 24;
 				else
 					CurrentAimBonePosition--;
 				Sleep(100);
