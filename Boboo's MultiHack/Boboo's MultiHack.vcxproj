@@ -146,6 +146,14 @@
     <Text Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\LinkingFix.h" />
+    <ClInclude Include="Source\Menu.h" />
+    <ClInclude Include="Source\Aimbot.h" />
+    <ClInclude Include="Source\Engine.h" />
+    <ClInclude Include="Source\ESP.h" />
+    <ClInclude Include="Source\MathCalc.h" />
+    <ClInclude Include="Source\Misc.h" />
+    <ClInclude Include="Source\Utils.h" />
     <ClInclude Include="Source\dllmain.h" />
     <ClInclude Include="Source\Drawing.h" />
     <ClInclude Include="Source\Offsets.h" />
@@ -155,6 +163,14 @@
     <ClInclude Include="Source\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Menu.cpp" />
+    <ClCompile Include="Source\Aimbot.cpp" />
+    <ClCompile Include="Source\MathCalc.cpp" />
+    <ClCompile Include="Source\Drawing.cpp" />
+    <ClCompile Include="Source\Engine.cpp" />
+    <ClCompile Include="Source\ESP.cpp" />
+    <ClCompile Include="Source\Misc.cpp" />
+    <ClCompile Include="Source\Utils.cpp" />
     <ClCompile Include="Source\dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

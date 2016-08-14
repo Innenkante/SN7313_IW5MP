@@ -21,6 +21,7 @@
 #include <fstream>
 #include <math.h>
 #include <d3d.h>
+#include <map>
 //
 
 
@@ -29,10 +30,18 @@
 #include "Structs.h"
 #include "Typedefs.h"
 #include "Drawing.h"
+#include "Engine.h"
+#include "Utils.h"
+#include "MathCalc.h"
+#include "Aimbot.h"
+#include "Menu.h"
+#include "Misc.h"
+
 
 
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )
 #define ScaleRadarY(y)(y * (480.0f / RefDef->Height) )
+
 
 
 

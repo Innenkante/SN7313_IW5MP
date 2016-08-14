@@ -9,10 +9,15 @@ typedef void(__cdecl* DrawEngineRadar_t)(int unk1, int disableRotation, int unk2
 typedef void(__cdecl* OverlayPackage_t)(int a1, int a2, int a3, RadarHud* radar, int shader, vec4_t color);
 typedef void(*OverlayEnemy_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t color);
 typedef void(*OverlayFriendly_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t color);
+typedef void(*OverlayTurret_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t col);
+typedef void(*OverlayHeli_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t col);
+typedef void(*OverlayLocal_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t col);
+typedef void(*OverlayPlane_t)(int a1, int a2, int a3, RadarHud* hud, vec4_t col);
 typedef int* (*RegisterShader_t) (char* ShaderName);
 typedef ScreenMatrix* (*GetScreenMatrix_t)();
 typedef bool(*World2Screen_t)(int unknown, ScreenMatrix* w2scalc, float* vPoint, float* Screen);
 typedef int(__cdecl* RegisterTag_t)(char* Tag);
 typedef int(__cdecl* ProcessCMD)(int* Arg, char* CMD);
-
+typedef void(__cdecl* CG_Trace_t) (Trace_t* results, vec3_t start, vec3_t End, int passEntity, DWORD Mask);
+typedef bool(__cdecl* CL_IsEntityVisible_t)(int, int*);
 
