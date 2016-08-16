@@ -12,6 +12,11 @@ public:
 	void UnlockClasses();
 	void ForceJugg();
 	void ChangeTeam();
+	char* GetPlayerName();
+	char* GetPlayerXUID();
+	char* GetServerName();
+	char* GetServerIP();
+
 private:
 
 };

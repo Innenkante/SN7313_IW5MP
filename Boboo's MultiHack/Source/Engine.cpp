@@ -65,3 +65,8 @@ bool Engine_::IsVisible(int ClientNumber)
 {
 	return IsEntityVisible_(0, (int*)(0x00A08630 + (0x1F8 * (ClientNumber & 2047))));
 }
+
+int Engine_::GetXUID(int ClientNumber)
+{
+	return *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * ClientNumber));
+}

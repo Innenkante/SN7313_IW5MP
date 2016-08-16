@@ -1,4 +1,5 @@
 #pragma once
+
 class ESP
 {
 public:
@@ -14,6 +15,7 @@ public:
 	void WeaponESP(bool state);
 	void SnaplineESP(bool state);
 	void ShaderESP(bool state);
+	 
 private:
 
 };

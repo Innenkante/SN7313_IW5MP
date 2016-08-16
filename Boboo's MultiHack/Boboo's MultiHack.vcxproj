@@ -123,6 +123,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,6 +147,8 @@
     <Text Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Dictionary_mod.h" />
+    <ClInclude Include="Source\Hooking.h" />
     <ClInclude Include="Source\LinkingFix.h" />
     <ClInclude Include="Source\Menu.h" />
     <ClInclude Include="Source\Aimbot.h" />
@@ -163,6 +166,8 @@
     <ClInclude Include="Source\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Dictionary_mod.cpp" />
+    <ClCompile Include="Source\Hooking.cpp" />
     <ClCompile Include="Source\Menu.cpp" />
     <ClCompile Include="Source\Aimbot.cpp" />
     <ClCompile Include="Source\MathCalc.cpp" />

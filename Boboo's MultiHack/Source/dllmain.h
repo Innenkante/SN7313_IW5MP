@@ -22,6 +22,8 @@
 #include <math.h>
 #include <d3d.h>
 #include <map>
+#include <functional>
+#include <detours.h>
 //
 
 
@@ -36,7 +38,7 @@
 #include "Aimbot.h"
 #include "Menu.h"
 #include "Misc.h"
-
+#include "Hooking.h"
 
 
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )

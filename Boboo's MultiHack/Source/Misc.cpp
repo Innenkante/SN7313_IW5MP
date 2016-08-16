@@ -121,3 +121,36 @@ void Misc_::ChangeTeam()
 		sprintf_s(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
 	Engine.SendCommandToConsole(buffer);
 }
+
+char* Misc_::GetPlayerName()
+{
+	const char* Name = (const char*)PLAYERNAMEOFF;
+	char buf[32] = "";
+	sprintf_s(buf, Name);
+	return buf;
+}
+
+char * Misc_::GetPlayerXUID()
+{
+	int* ID = (int*)XUIDOFF;
+	char buf[16];
+	sprintf_s(buf, "%ld", *ID);
+	return buf;
+}
+
+char * Misc_::GetServerName()
+{
+	const char* ServerName = (const char*)SERVERNAMEOFF;
+	char buf[64] = "";
+	sprintf_s(buf, ServerName);
+	return buf;
+}
+
+char * Misc_::GetServerIP()
+{
+	const char* ServerIP = (const char*)SERVERIPOFF;
+	char buf[32] = "";
+	sprintf_s(buf, ServerIP);
+	return buf;
+}
+

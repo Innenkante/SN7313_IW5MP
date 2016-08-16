@@ -18,6 +18,8 @@ public:
 	Trace_t TraceToTarget(float* TargetVector);
 	void Shoot();
 	bool IsVisible(int ClientNumber);
+	MessageGiver_t MessageGiver = (MessageGiver_t)0x004A6660;
+	int GetXUID(int ClientNumber);
 private:
 	CG_Trace_t Trace_ = (CG_Trace_t)0x55A820;
 	CL_IsEntityVisible_t IsEntityVisible_= (CL_IsEntityVisible_t)0x54E6D0;
