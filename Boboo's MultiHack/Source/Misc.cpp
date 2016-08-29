@@ -43,6 +43,8 @@ void Misc_::Laser(bool state)
 
 void Misc_::Crosshair(bool state)
 {
+	if (!state)
+		return;
 	RefDef_T* refdef = (RefDef_T*)REFDEFOFF;
 
 	if (!refdef->Width || !refdef->Height)

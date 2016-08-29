@@ -147,7 +147,6 @@
     <Text Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Dictionary_mod.h" />
     <ClInclude Include="Source\Hooking.h" />
     <ClInclude Include="Source\LinkingFix.h" />
     <ClInclude Include="Source\Menu.h" />
@@ -166,7 +165,6 @@
     <ClInclude Include="Source\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Dictionary_mod.cpp" />
     <ClCompile Include="Source\Hooking.cpp" />
     <ClCompile Include="Source\Menu.cpp" />
     <ClCompile Include="Source\Aimbot.cpp" />

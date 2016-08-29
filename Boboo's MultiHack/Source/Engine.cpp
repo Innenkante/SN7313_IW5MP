@@ -53,6 +53,7 @@ Trace_t Engine_::TraceToTarget(float * TargetVector)
 bool Shooting = false;
 void Engine_::Shoot()
 {
+	
 	byte* Scoped = (byte*)0x10603B0;
 	Input_t* Input = (Input_t*)0x00B39EE0;
 	*Scoped = 1;

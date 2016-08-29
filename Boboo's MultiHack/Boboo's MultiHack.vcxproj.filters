@@ -66,9 +66,6 @@
     <ClInclude Include="Source\Hooking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\Dictionary_mod.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\dllmain.cpp">
@@ -102,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Hooking.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Boboo%27s MultiHack\Boboo%27s MultiHack\Dictionary_mod.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

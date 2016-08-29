@@ -9,6 +9,8 @@ char* Bones_Collection[] =
 
 void Aimbot_::ClosestAimbot(bool state, char * Bone)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
@@ -96,6 +98,8 @@ void Aimbot_::ClosestAimbot(bool state, char * Bone)
 
 void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
@@ -186,6 +190,8 @@ void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 
 void Aimbot_::BestTraceAimbot(bool state)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
@@ -265,4 +271,14 @@ void Aimbot_::BestTraceAimbot(bool state)
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 
+	Engine.Shoot();
+
+	
+}
+
+void Aimbot_::Wrapper()
+{
+	BestTraceAimbot(BestTraceAimbotEnabled);
+	InScreenRangeAimbot(InScreenRangeAimbotEnabled,AimboneName,FieldOfAim);
+	ClosestAimbot(ClosestAimbotEnabled,AimboneName);
 }

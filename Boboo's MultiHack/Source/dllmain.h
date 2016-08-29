@@ -39,6 +39,7 @@
 #include "Menu.h"
 #include "Misc.h"
 #include "Hooking.h"
+#include "ESP.h"
 
 
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )

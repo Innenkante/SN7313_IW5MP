@@ -31,3 +31,5 @@ static Misc_ Misc;
 static Math_ Math;
 static Menu_ Menu;
 static Hook_ Hook;
+static ESP_ ESP;
+static Aimbot_ Aimbot;

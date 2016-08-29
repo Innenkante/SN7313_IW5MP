@@ -2,8 +2,7 @@
 #include "ESP.h"
 #include "LinkingFix.h"
 
-
-void ESP::CirlceESP(bool state)
+void ESP_::CirlceESP(bool state)
 {
 	if (!state)
 		return;
@@ -42,36 +41,6 @@ void ESP::CirlceESP(bool state)
 
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_MainRoot, Screen_MainRoot);
-			float distance = Math.GetDistance(refdef->Origin, Utils.ParseVec(TagPos_head));
-
-			char buf_Name[1024];
-			char buf_ClientNum[1024];
-			char buf_Distance[1024];
-			char buf_Rank[1024];
-			char buf_Score[1024];
-			char buf_GUID[1024];
-
-			sprintf_s(buf_Name, "^3 %s ", Clients[i]->Name);
-			sprintf_s(buf_ClientNum, "^3Slot: ^1 %d", Entity[i]->ClientNumber);
-			sprintf_s(buf_Distance, "Dist: %d", (int)distance);
-			sprintf_s(buf_Rank, "Rank: %d", Clients[i]->Rank + 1); //Rank starts at -1 so rank 80 = 79 internal
-			sprintf_s(buf_Score, "Score: %d", Clients[i]->Score);
-			//sprintf_s(buf_GUID, "^3GUID: ^1 %d", GetGUID(i));
-
-			////TODO Recoding the whole mess here
-			//if (ESP_DrawName)
-			//	DrawTextMW3(Screen_head[0] - 40, Screen_head[1] - 5, RegisterFont(FONT_SMALL_DEV), ColorWhite, buf_Name); //Name 
-			//if (ESP_DrawClientNum)
-			//	DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, RegisterFont(FONT_SMALL_DEV), ColorWhite, buf_ClientNum); //ClientNumber
-			//if (ESP_DrawDistance)
-			//	DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, RegisterFont(FONT_SMALL_DEV), ColorBlue, buf_Distance); //Distance
-			//if (ESP_DrawRank)
-			//	DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, RegisterFont(FONT_SMALL_DEV), ColorBlue, buf_Rank); //Rank
-			//if (ESP_DrawScore)
-			//	DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, RegisterFont(FONT_SMALL_DEV), ColorBlue, buf_Score); //Score
-			//if (ESP_DrawGUID)
-			//	DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 48, RegisterFont(FONT_SMALL_DEV), ColorWhite, buf_GUID); //GUID
-
 
 			if (DeathMatch)
 			{
@@ -87,8 +56,197 @@ void ESP::CirlceESP(bool state)
 	}
 }
 
-void ESP::BoneESP(bool state)
+void ESP_::NameESP(bool state)
 {
+	if (!state)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Clients[18];
+	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	float* ViewX = (float*)0x0106389C;
+	float* ViewY = (float*)0x01063898;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
+		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		{
+			float TagPos_head[3];
+			float Screen_head[2];
+			Engine.GetTagPos(Entity[i], "j_head", TagPos_head);
+			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
+			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
+			char buf_Name[1024];
+			sprintf_s(buf_Name, "^3 %s ", Clients[i]->Name);
+			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + -5, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Name); //Name 
+		}
+	}
+}
+
+void ESP_::SlotESP(bool state)
+{
+	if (!state)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Clients[18];
+	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	float* ViewX = (float*)0x0106389C;
+	float* ViewY = (float*)0x01063898;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
+		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		{
+			float TagPos_head[3];
+			float Screen_head[2];
+			Engine.GetTagPos(Entity[i], "j_head", TagPos_head);
+			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
+			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
+			char buf_Slot[1024];
+			sprintf_s(buf_Slot, "^3 %s ", Clients[i]->ClientNumber);
+			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Slot); 
+		}
+	}
+}
+
+
+void ESP_::RankESP(bool state)
+{
+	if (!state)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Clients[18];
+	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	float* ViewX = (float*)0x0106389C;
+	float* ViewY = (float*)0x01063898;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
+		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		{
+			float TagPos_head[3];
+			float Screen_head[2];
+			Engine.GetTagPos(Entity[i], "j_head", TagPos_head);
+			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
+			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
+			char buf_Rank[1024];
+			sprintf_s(buf_Rank, "^3 %s ", Clients[i]->Rank);
+			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Rank);
+		}
+	}
+}
+
+void ESP_::DistanceESP(bool state)
+{
+	if (!state)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Clients[18];
+	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	float* ViewX = (float*)0x0106389C;
+	float* ViewY = (float*)0x01063898;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
+		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		{
+			float TagPos_head[3];
+			float Screen_head[2];
+			Engine.GetTagPos(Entity[i], "j_head", TagPos_head);
+			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
+			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
+			char buf_Distance[1024];
+			float distance = Math.GetDistance(refdef->Origin, Utils.ParseVec(TagPos_head));
+			sprintf_s(buf_Distance, "^3 %f ", distance);
+			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
+		}
+	}
+}
+
+void ESP_::XUIDESP(bool state)
+{
+	if (!state)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Clients[18];
+	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	float* ViewX = (float*)0x0106389C;
+	float* ViewY = (float*)0x01063898;
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * (int)ENTITYSIZE));
+		Clients[i] = (ClientInfo_T*)(CLIENTOFF + (i * (int)CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Clients[i]->Valid)
+		{
+			float TagPos_head[3];
+			float Screen_head[2];
+			Engine.GetTagPos(Entity[i], "j_head", TagPos_head);
+			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
+			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
+			char buf_XUID[1024];
+			long GUID = Engine.GetXUID(Clients[i]->ClientNumber);
+			sprintf_s(buf_XUID, "^3 %d ", GUID);
+			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_XUID);
+		}
+	}
+}
+void ESP_::BoneESP(bool state)
+{
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	CG_T* cg = (CG_T*)(CGOFF);
@@ -322,8 +480,10 @@ void ESP::BoneESP(bool state)
 	}
 }
 
-void ESP::ThreeDBoxESP(bool state)
+void ESP_::ThreeDBoxESP(bool state)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	CG_T* cg = (CG_T*)(CGOFF);
@@ -356,8 +516,10 @@ void ESP::ThreeDBoxESP(bool state)
 	}
 }
 
-void ESP::WeaponESP(bool state)
+void ESP_::WeaponESP(bool state)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[2048];
 	float oldangle = 0;
 	for (int i = 0; i < 2048; i++)
@@ -459,8 +621,10 @@ void ESP::WeaponESP(bool state)
 	}
 }
 
-void ESP::SnaplineESP(bool state)
+void ESP_::SnaplineESP(bool state)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	CG_T* cg = (CG_T*)(CGOFF);
@@ -500,8 +664,10 @@ void ESP::SnaplineESP(bool state)
 	}
 }
 
-void ESP::ShaderESP(bool state)
+void ESP_::ShaderESP(bool state)
 {
+	if (!state)
+		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
 	CG_T* cg = (CG_T*)(CGOFF);
@@ -538,4 +704,19 @@ void ESP::ShaderESP(bool state)
 		}
 
 	}
+}
+
+void ESP_::Wrapper()
+{
+	CirlceESP(CircleESPEnabled);
+	BoneESP(BoneESPEnabled);
+	ThreeDBoxESP(ThreeDBoxESPEnabled);
+	WeaponESP(WeaponESPEnabled);
+	SnaplineESP(SnaplineESPEnabled);
+	ShaderESP(ShaderESPEnabled);
+	NameESP(NameESPEnabled);
+	XUIDESP(XUIDESPEnabled);
+	RankESP(RankESPEnabled);
+	SlotESP(SlotESPEnabled);
+	Misc.Crosshair(Misc.CrosshairEnabled);
 }

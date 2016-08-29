@@ -9,7 +9,25 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 	Menu.CurrentActiveMenu = Menu.ESPMenuTab;
 	Menu.BasePosX = 100;
 	Menu.BasePosY = 100;
+	Menu.OptionNumber = 0;
 	Menu.Enabled = true;
+	Misc.NoRecoil(false);
+	ESP.BoneESPEnabled = true;
+	ESP.CircleESPEnabled = false;
+	ESP.DistanceESPEnabled = true;
+	ESP.NameESPEnabled = true;
+	ESP.RankESPEnabled = true;
+	ESP.ScoreESPEnabled = true;
+	ESP.XUIDESPEnabled = true;
+	ESP.ShaderESPEnabled =	false;
+	ESP.SnaplineESPEnabled = true;
+	ESP.ThreeDBoxESPEnabled = true;
+	ESP.WeaponESPEnabled = false;
+	Aimbot.BestTraceAimbotEnabled = false;
+	Aimbot.InScreenRangeAimbotEnabled = true;
+	Aimbot.FieldOfAim = 50;
+	Aimbot.AimboneName = "j_mainroot";
+	Aimbot.ClosestAimbotEnabled = false;
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_F1))
@@ -24,33 +42,87 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 		}
 		if (GetAsyncKeyState(VK_F2))
 		{
+			Menu.OptionNumber = 0;
 			if (Menu.CurrentActiveMenu == 3)
 				Menu.CurrentActiveMenu = 0;
 			else
 				Menu.CurrentActiveMenu++;
 			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_RIGHT) && GetAsyncKeyState(VK_CONTROL))
+		if (GetAsyncKeyState(VK_CONTROL))
 		{
-			Menu.BasePosX++;
-			Sleep(1);
+			if (GetAsyncKeyState(VK_RIGHT))
+			{
+				Menu.BasePosX++;
+				Sleep(1);
+			}
+			if (GetAsyncKeyState(VK_LEFT))
+			{
+				Menu.BasePosX--;
+				Sleep(1);
+			}
+			if (GetAsyncKeyState(VK_UP))
+			{
+				Menu.BasePosY--;
+				Sleep(1);
+			}
+			if (GetAsyncKeyState(VK_DOWN))
+			{
+				Menu.BasePosY++;
+				Sleep(1);
+			}
+			continue;
 		}
-		if (GetAsyncKeyState(VK_LEFT) && GetAsyncKeyState(VK_CONTROL))
+		if (GetAsyncKeyState(VK_DOWN))
 		{
-			Menu.BasePosX--;
-			Sleep(1);
+			if (Menu.CurrentActiveMenu == Menu.ESPMenuTab)
+			{
+				if (Menu.OptionNumber != 11)
+					Menu.OptionNumber++;
+				else
+					Menu.OptionNumber = 0;
+			}
+			if (Menu.CurrentActiveMenu == Menu.AimbotMenuTab)
+			{
+				if (Menu.OptionNumber != 4)
+					Menu.OptionNumber++;
+				else
+					Menu.OptionNumber = 0;
+			}
+			if (Menu.CurrentActiveMenu == Menu.MiscMenuTab)
+			{
+				if (Menu.OptionNumber != 4)
+					Menu.OptionNumber++;
+				else
+					Menu.OptionNumber = 0;
+			}
+			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_CONTROL))
+		if (GetAsyncKeyState(VK_UP))
 		{
-			Menu.BasePosY--;
-			Sleep(1);
+			if (Menu.CurrentActiveMenu == Menu.ESPMenuTab)
+			{
+				if (Menu.OptionNumber != 0)
+					Menu.OptionNumber--;
+				else
+					Menu.OptionNumber = 11;
+			}
+			if (Menu.CurrentActiveMenu == Menu.AimbotMenuTab)
+			{
+				if (Menu.OptionNumber != 0)
+					Menu.OptionNumber--;
+				else
+					Menu.OptionNumber = 4;
+			}
+			if (Menu.CurrentActiveMenu == Menu.MiscMenuTab)
+			{
+				if (Menu.OptionNumber != 0)
+					Menu.OptionNumber--;
+				else
+					Menu.OptionNumber = 4;
+			}
+			Sleep(100);
 		}
-		if (GetAsyncKeyState(VK_DOWN) && GetAsyncKeyState(VK_CONTROL))
-		{
-			Menu.BasePosY++;
-			Sleep(1);
-		}
-
 	}
 	Sleep(10);
 	return 1;
@@ -70,12 +142,13 @@ __declspec(naked) void hkShowList()
 		PUSHFD;
 	}
 	Menu.DrawMenuWrapper();
+	ESP.Wrapper();
+	Misc.Crosshair(true);
 	__asm
 	{
 		POPFD;
 		POPAD;
 		JMP[hkShowListJmp]
-
 	}
 }
 
@@ -86,7 +159,7 @@ __declspec(naked) void hkDraw2D()
 	__asm PUSHAD
 	__asm PUSHFD
 
-	//TODO add aimbot wrapper here after menu is done
+	Aimbot.Wrapper();
 	__asm POPFD
 	__asm POPAD
 
