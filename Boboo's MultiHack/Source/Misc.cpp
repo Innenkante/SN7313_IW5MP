@@ -3,56 +3,64 @@
 
 #include "LinkingFix.h"
 
+bool Misc::NoRecoilEnabled = false;
+bool Misc::NoSpreadEnabled = false;
+bool Misc::FullBrightEnabled = false;
+bool Misc::CrosshairEnabled = false;
+bool Misc::LaserEnabled = false;
+bool Misc::ChatSpamEnabled = false;
+int Misc::OldKillCount;
 
-void Misc_::NoRecoil(bool state)
+
+void Misc::NoRecoil()
 {
 	BYTE* nr = (BYTE*)NORECOILOFF;
-	if (state)
+	if (NoRecoilEnabled)
 		*nr = 235;
 	else
 		*nr = 116;
 }
 
-void Misc_::NoSpread(bool state)
+void Misc::NoSpread()
 {
 	float* nospr = (float*)NOSPREADOFF;
-	if (state)
+	if (NoSpreadEnabled)
 		*nospr = 0;
 	else
 		*nospr = 0.6499999762f;
 }
 
-void Misc_::FullBright(bool state)
+void Misc::FullBright()
 {
 	int* fullbright = (int*)FULLBRIGHTOFF;
-	if (state)
+	if (FullBrightEnabled)
 		*fullbright = 4;
 	else
 		*fullbright = 9;
 }
 
-void Misc_::Laser(bool state)
+void Misc::Laser()
 {
 	BYTE* laser = (BYTE*)LASEROFF;
 
-	if (state)
+	if (LaserEnabled)
 		*laser = 0;
 	else
 		*laser = 37;
 }
 
-void Misc_::Crosshair(bool state)
+void Misc::Crosshair()
 {
-	if (!state)
+	if (!CrosshairEnabled)
 		return;
 	RefDef_T* refdef = (RefDef_T*)REFDEFOFF;
 
 	if (!refdef->Width || !refdef->Height)
 		return;
-	Draw.DrawTextMW3(refdef->Width / 2 - 7, refdef->Height / 2 + 10, Engine.RegisterFont_(FONT_BIG_DEV), ColorGreen, "+");
+	Draw::DrawTextMW3(refdef->Width / 2 - 7, refdef->Height / 2 + 10, Engine.RegisterFont_(FONT_BIG_DEV), ColorGreen, "+");
 }
 
-void Misc_::ChangeName()
+void Misc::ChangeName()
 {
 	srand(static_cast<int>(time(NULL)));
 	BYTE* checkname = (BYTE*)PLAYERNAMECHECKBYTEOFF;
@@ -65,17 +73,7 @@ void Misc_::ChangeName()
 		name[i] = newname[i];
 }
 
-void Misc_::RandomCreds()
-{
-	srand(static_cast<int>(time(NULL)));
-	*(ULONG*)0x05CCB272 = (ULONG)(0x11000010000000 + rand() + (rand() * 10) + (rand() * 100));//steam
-	*(ULONG*)0x00464A58 = (ULONG)(0x11000010000000 + rand() + (rand() * 10) + (rand() * 100));//xna
-	*(ULONG*)0x05A7B1D8 = (ULONG)(0x11000010000000 + rand() + (rand() * 10) + (rand() * 100));//xuid
-
-	ChangeName();
-}
-
-void Misc_::UnlockClasses()
+void Misc::UnlockClasses()
 {
 	int *force1 = (int*)FORCECLASS1;
 	int *force2 = (int*)FORCECLASS2;
@@ -98,7 +96,7 @@ void Misc_::UnlockClasses()
 	*force9 = 0;
 }
 
-void Misc_::ForceJugg()
+void Misc::ForceJugg()
 {
 	CG_T* cg = (CG_T*)CGOFF;
 	int* MagicNum = (int*)MATCHIDOFF;
@@ -108,10 +106,10 @@ void Misc_::ForceJugg()
 		sprintf_s(buffer, "cmd mr %d 9 allies", *MagicNum);
 	if (LocalClient->Team == 2)
 		sprintf_s(buffer, "cmd mr %d 9 axis", *MagicNum);
-	Engine.SendCommandToConsole(buffer);
+	Engine.ProcessCMD_(0,buffer);
 }
 
-void Misc_::ChangeTeam()
+void Misc::ChangeTeam()
 {
 	CG_T* cg = (CG_T*)CGOFF;
 	int* MagicNum = (int*)MATCHIDOFF;
@@ -121,10 +119,10 @@ void Misc_::ChangeTeam()
 		sprintf_s(buffer, "cmd mr %d 2 allies", *MagicNum);
 	if (LocalClient->Team == 2)
 		sprintf_s(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
-	Engine.SendCommandToConsole(buffer);
+	Engine.ProcessCMD_(0, buffer);
 }
 
-char* Misc_::GetPlayerName()
+char* Misc::GetPlayerName()
 {
 	const char* Name = (const char*)PLAYERNAMEOFF;
 	char buf[32] = "";
@@ -132,7 +130,7 @@ char* Misc_::GetPlayerName()
 	return buf;
 }
 
-char * Misc_::GetPlayerXUID()
+char * Misc::GetPlayerXUID()
 {
 	int* ID = (int*)XUIDOFF;
 	char buf[16];
@@ -140,7 +138,7 @@ char * Misc_::GetPlayerXUID()
 	return buf;
 }
 
-char * Misc_::GetServerName()
+char * Misc::GetServerName()
 {
 	const char* ServerName = (const char*)SERVERNAMEOFF;
 	char buf[64] = "";
@@ -148,7 +146,7 @@ char * Misc_::GetServerName()
 	return buf;
 }
 
-char * Misc_::GetServerIP()
+char * Misc::GetServerIP()
 {
 	const char* ServerIP = (const char*)SERVERIPOFF;
 	char buf[32] = "";
@@ -156,3 +154,36 @@ char * Misc_::GetServerIP()
 	return buf;
 }
 
+
+void Misc::ChatSpam()
+{
+	if (!ChatSpamEnabled)
+		return;
+	int* KillCount = (int*)0xA03DCC;
+	if (*KillCount == OldKillCount)
+	{
+		return;
+	}
+
+	if (*KillCount > 0)
+	{
+		char* OpponenetsName = (char*)0x058C379E;
+		char Buf[128];
+		sprintf_s(Buf, "say %s ^1got ^2rekt ^3by ^5SN7313 ^4Download ^;at ^:mpgh.net");
+		OldKillCount = *KillCount;
+	}
+
+}
+
+void Misc::Wrapper()
+{
+	Misc::Crosshair();
+}
+
+void Misc::VoteKickPlayerExploit()
+{
+	const char* Name = GetPlayerName();
+	char Buffer[64];
+	sprintf_s(Buffer, "callvote kick %s", Name);
+	Engine.ProcessCMD_(0, Buffer);
+}

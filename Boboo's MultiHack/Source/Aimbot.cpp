@@ -2,14 +2,20 @@
 #include "Aimbot.h"
 #include "LinkingFix.h"
 
-char* Bones_Collection[] =
-{
-	"j_head","j_neck","j_spine4","j_wrist_ri","j_wrist_le","j_elbow_ri","j_elbow_le","j_shoulder_ri","j_shoulder_le","j_ankle_ri","j_ankle_le","j_knee_ri","j_knee_le","j_hip_ri","j_hip_le","pelvis","j_mainroot",
-};
 
-void Aimbot_::ClosestAimbot(bool state, char * Bone)
+bool Aimbot::ClosestAimbotEnabled = false;
+bool Aimbot::AimAssistEnabled = false;
+bool Aimbot::BestTraceAimbotEnabled = false;
+int Aimbot:: FieldOfAim = 50;
+int Aimbot::AimboneID = 0;
+float Aimbot::MinTraceValue = 0.82f;
+char* Aimbot::Bones_Collection[] = { "j_head","j_neck","j_spine4","j_wrist_ri","j_wrist_le","j_elbow_ri","j_elbow_le","j_shoulder_ri","j_shoulder_le","j_ankle_ri","j_ankle_le","j_knee_ri","j_knee_le","j_hip_ri","j_hip_le","pelvis","j_mainroot"};
+
+
+
+void Aimbot::ClosestAimbot(char * Bone)
 {
-	if (!state)
+	if (!ClosestAimbotEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -51,7 +57,7 @@ void Aimbot_::ClosestAimbot(bool state, char * Bone)
 
 
 
-				float CurrentDistance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(TagPos_bone));
+				float CurrentDistance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_bone));
 				if (CurrentDistance < ClosestDistance)
 				{
 					ClosestPlayerClientNumber = Entity[i]->ClientNumber;
@@ -71,7 +77,7 @@ void Aimbot_::ClosestAimbot(bool state, char * Bone)
 			if (Tmp.fraction < 0.87f)
 				continue;
 
-			float CurrentDistance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(TagPos_bone));
+			float CurrentDistance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_bone));
 			if (CurrentDistance < ClosestDistance)
 			{
 				ClosestPlayerClientNumber = Entity[i]->ClientNumber;
@@ -85,7 +91,7 @@ void Aimbot_::ClosestAimbot(bool state, char * Bone)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
-	Angles = Math.CalcAngles(RefDef->Origin, Utils.ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -96,9 +102,9 @@ void Aimbot_::ClosestAimbot(bool state, char * Bone)
 }
 
 
-void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
+void Aimbot::InScreenRangeAimbot(char * Bone,int FieldOfAim)
 {
-	if (!state)
+	if (!AimAssistEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -134,12 +140,12 @@ void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 					return;
 				Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_bone);
 				float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
-				float DistancePlayerBoneToScreenCenter = Math.GetDistance(Utils.ParseVec(PlayerScreenCenter), Utils.ParseVec(Screen_bone));
+				float DistancePlayerBoneToScreenCenter = Math::GetDistance(Utils::ParseVec(PlayerScreenCenter), Utils::ParseVec(Screen_bone));
 
 				if (!Engine.IsVisible(Entity[i]->ClientNumber))
 					continue;
 
-				if (DistancePlayerBoneToScreenCenter < FieldOfAim) //TODO
+				if (DistancePlayerBoneToScreenCenter < FieldOfAim)
 				{
 					if (DistancePlayerBoneToScreenCenter < ClosestDistance)
 					{
@@ -157,12 +163,12 @@ void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 				return;
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_bone);
 			float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
-			float DistancePlayerBoneToScreenCenter = Math.GetDistance(Utils.ParseVec(PlayerScreenCenter), Utils.ParseVec(Screen_bone));
+			float DistancePlayerBoneToScreenCenter = Math::GetDistance(Utils::ParseVec(PlayerScreenCenter), Utils::ParseVec(Screen_bone));
 
-			if (!Engine.IsVisible(Entity[i]->ClientNumber)) //TODO
+			if (!Engine.IsVisible(Entity[i]->ClientNumber)) 
 				continue;
 
-			if (DistancePlayerBoneToScreenCenter < FieldOfAim) //TODO
+			if (DistancePlayerBoneToScreenCenter < FieldOfAim) 
 			{
 				if (DistancePlayerBoneToScreenCenter < ClosestDistance)
 				{
@@ -177,7 +183,7 @@ void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
-	Angles = Math.CalcAngles(RefDef->Origin, Utils.ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -188,9 +194,9 @@ void Aimbot_::InScreenRangeAimbot(bool state, char * Bone,int FieldOfAim)
 
 }
 
-void Aimbot_::BestTraceAimbot(bool state)
+void Aimbot::BestTraceAimbot(float MinTraceVal)
 {
-	if (!state)
+	if (!BestTraceAimbotEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -229,7 +235,7 @@ void Aimbot_::BestTraceAimbot(bool state)
 					if (!Engine.GetTagPos(Entity[i], Bones_Collection[x], TagPos_bone))
 						continue;
 					Trace_t tmptrace = Engine.TraceToTarget(TagPos_bone);
-					if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > 0.80)
+					if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > MinTraceVal)
 					{
 						BestBoneID = x;
 						BestTraceVal = tmptrace.fraction;
@@ -245,7 +251,7 @@ void Aimbot_::BestTraceAimbot(bool state)
 				if (!Engine.GetTagPos(Entity[i], Bones_Collection[x], TagPos_bone))
 					continue;
 				Trace_t tmptrace = Engine.TraceToTarget(TagPos_bone);
-				if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > 0.80)
+				if (tmptrace.fraction > BestTraceVal && !tmptrace.allsolid && tmptrace.fraction > MinTraceVal)
 				{
 					BestBoneID = x;
 					BestTraceVal = tmptrace.fraction;
@@ -263,7 +269,7 @@ void Aimbot_::BestTraceAimbot(bool state)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber],Bones_Collection[BestBoneID], AimAt);
-	Angles = Math.CalcAngles(RefDef->Origin, Utils.ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -271,14 +277,15 @@ void Aimbot_::BestTraceAimbot(bool state)
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 
+	weapon_t* CurrentWeapon = Engine.GetWeapon(Entity[cg->ClientNumber]->WeaponID);
+	if (strstr(CurrentWeapon->modelName, "msr") || strstr(CurrentWeapon->modelName, "l96a1"))
+		return;
 	Engine.Shoot();
-
-	
 }
 
-void Aimbot_::Wrapper()
+void Aimbot::Wrapper()
 {
-	BestTraceAimbot(BestTraceAimbotEnabled);
-	InScreenRangeAimbot(InScreenRangeAimbotEnabled,AimboneName,FieldOfAim);
-	ClosestAimbot(ClosestAimbotEnabled,AimboneName);
+	BestTraceAimbot(MinTraceValue);
+	InScreenRangeAimbot(Bones_Collection[AimboneID],FieldOfAim);
+	ClosestAimbot(Bones_Collection[AimboneID]);
 }

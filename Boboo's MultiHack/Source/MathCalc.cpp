@@ -1,21 +1,21 @@
 #include "stdafx.h"
 
-float Math_::GetDistance(Vector3D source, Vector3D destination)
+float Math::GetDistance(Vector3D source, Vector3D destination)
 {
 	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2) + pow(destination.z - source.z, 2));
 }
 
-float Math_::GetDistance(Vector2D source, Vector2D destination)
+float Math::GetDistance(Vector2D source, Vector2D destination)
 {
 	return sqrt(pow(destination.x - source.x, 2) + pow(destination.y - source.y, 2));
 }
 
-float Math_::GetMagnitude(Vector3D vec)
+float Math::GetMagnitude(Vector3D vec)
 {
 	return sqrt(pow(vec.x, 2) + pow(vec.y, 2) + pow(vec.z, 2));
 }
 
-Vector3D Math_::SubtractVec(Vector3D src, Vector3D dest)
+Vector3D Math::SubtractVec(Vector3D src, Vector3D dest)
 {
 	Vector3D vec(0, 0, 0);
 	vec.x = dest.x - src.x;
@@ -25,7 +25,7 @@ Vector3D Math_::SubtractVec(Vector3D src, Vector3D dest)
 	return vec;
 }
 
-Vector3D Math_::NormalizeVec(Vector3D vec)
+Vector3D Math::NormalizeVec(Vector3D vec)
 {
 	float Length = GetMagnitude(vec);
 
@@ -36,7 +36,7 @@ Vector3D Math_::NormalizeVec(Vector3D vec)
 	return vec;
 }
 
-Vector3D Math_::MultiplyVec(Vector3D src, Vector3D dest)
+Vector3D Math::MultiplyVec(Vector3D src, Vector3D dest)
 {
 	src.x *= dest.x;
 	src.y *= dest.y;
@@ -45,7 +45,7 @@ Vector3D Math_::MultiplyVec(Vector3D src, Vector3D dest)
 	return src;
 }
 
-Vector2D Math_::CalcAngles(Vector3D src, Vector3D dest, Vector3D ViewAxis[3])
+Vector2D Math::CalcAngles(Vector3D src, Vector3D dest, Vector3D ViewAxis[3])
 {
 	Vector3D aimAt = SubtractVec(src, dest);
 	Vector3D normalized = NormalizeVec(aimAt);

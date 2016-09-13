@@ -1,19 +1,20 @@
 #pragma once
 #include "stdafx.h"
-class Aimbot_
+static class Aimbot
 {
 public:
-	bool ClosestAimbotEnabled;
-	bool InScreenRangeAimbotEnabled;
-	bool BestTraceAimbotEnabled;
-	int FieldOfAim;
-	char* AimboneName;
-	void ClosestAimbot(bool state, char* Bone);
-	void InScreenRangeAimbot(bool state, char* Bone,int FieldOfAim);
-	void BestTraceAimbot(bool state);
-	void Wrapper();
+	static bool ClosestAimbotEnabled;
+	static bool AimAssistEnabled;
+	static bool BestTraceAimbotEnabled;
+	static int FieldOfAim;
+	static int AimboneID;
+	static float MinTraceValue;
+	static char* Bones_Collection[17];
+	static void Wrapper();
 private:
-
+	static void ClosestAimbot(char * Bone);
+	static void InScreenRangeAimbot(char* Bone, int FieldOfAim);
+	static void BestTraceAimbot(float MinTraceVal);
 };
 
 

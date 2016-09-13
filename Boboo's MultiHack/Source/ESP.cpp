@@ -2,10 +2,39 @@
 #include "ESP.h"
 #include "LinkingFix.h"
 
-void ESP_::CirlceESP(bool state)
+bool ESP::CircleESPEnabled = false;
+bool ESP::BoneESPEnabled = false;
+bool ESP::NameESPEnabled = false;
+bool ESP::SlotESPEnabled = false;
+bool ESP::RankESPEnabled = false;
+bool ESP::DistanceESPEnabled = false;
+bool ESP::XUIDESPEnabled = false;
+bool ESP::ThreeDBoxESPEnabled = false;
+bool ESP::WeaponESPEnabled = false; 
+bool ESP::SnaplineESPEnabled = false;
+bool ESP::ShaderESPEnabled = false;
+
+
+void ESP::Wrapper()
 {
-	if (!state)
+	CirlceESP();
+	BoneESP();
+	NameESP();
+	SlotESP();
+	RankESP();
+	DistanceESP();
+	XUIDESP();
+	ThreeDBoxESP();
+	WeaponESP();
+	SnaplineESP();
+	ShaderESP();
+}
+
+void ESP::CirlceESP()
+{
+	if (!CircleESPEnabled)
 		return;
+
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
@@ -44,21 +73,21 @@ void ESP_::CirlceESP(bool state)
 
 			if (DeathMatch)
 			{
-				Draw.DrawCirlceOnScreen(Utils.ParsVec(Screen_MainRoot), Math.GetDistance(Utils.ParsVec(Screen_MainRoot), Utils.ParsVec(Screen_head)), ColorRed);
+				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorRed);
 				continue;
 			}
 			if (Clients[i]->Team == LocalClient->Team)
-				Draw.DrawCirlceOnScreen(Utils.ParsVec(Screen_MainRoot), Math.GetDistance(Utils.ParsVec(Screen_MainRoot), Utils.ParsVec(Screen_head)), ColorGreen);
+				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorGreen);
 			else
-				Draw.DrawCirlceOnScreen(Utils.ParsVec(Screen_MainRoot), Math.GetDistance(Utils.ParsVec(Screen_MainRoot), Utils.ParsVec(Screen_head)), ColorRed);
+				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorRed);
 
 		}
 	}
 }
 
-void ESP_::NameESP(bool state)
+void ESP::NameESP()
 {
-	if (!state)
+	if (!NameESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -88,14 +117,14 @@ void ESP_::NameESP(bool state)
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Name[1024];
 			sprintf_s(buf_Name, "^3 %s ", Clients[i]->Name);
-			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + -5, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Name); //Name 
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + -5, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Name); //Name 
 		}
 	}
 }
 
-void ESP_::SlotESP(bool state)
+void ESP::SlotESP()
 {
-	if (!state)
+	if (!SlotESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -124,16 +153,16 @@ void ESP_::SlotESP(bool state)
 			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Slot[1024];
-			sprintf_s(buf_Slot, "^3 %s ", Clients[i]->ClientNumber);
-			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Slot); 
+			sprintf_s(buf_Slot, "^3 %d ", Clients[i]->ClientNumber);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Slot); 
 		}
 	}
 }
 
 
-void ESP_::RankESP(bool state)
+void ESP::RankESP()
 {
-	if (!state)
+	if (!RankESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -162,15 +191,15 @@ void ESP_::RankESP(bool state)
 			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Rank[1024];
-			sprintf_s(buf_Rank, "^3 %s ", Clients[i]->Rank);
-			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Rank);
+			sprintf_s(buf_Rank, "^3 %d ", Clients[i]->Rank);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Rank);
 		}
 	}
 }
 
-void ESP_::DistanceESP(bool state)
+void ESP::DistanceESP()
 {
-	if (!state)
+	if (!DistanceESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -199,16 +228,16 @@ void ESP_::DistanceESP(bool state)
 			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Distance[1024];
-			float distance = Math.GetDistance(refdef->Origin, Utils.ParseVec(TagPos_head));
+			float distance = Math::GetDistance(refdef->Origin, Utils::ParseVec(TagPos_head));
 			sprintf_s(buf_Distance, "^3 %f ", distance);
-			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
 		}
 	}
 }
 
-void ESP_::XUIDESP(bool state)
+void ESP::XUIDESP()
 {
-	if (!state)
+	if (!XUIDESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Clients[18];
@@ -239,13 +268,13 @@ void ESP_::XUIDESP(bool state)
 			char buf_XUID[1024];
 			long GUID = Engine.GetXUID(Clients[i]->ClientNumber);
 			sprintf_s(buf_XUID, "^3 %d ", GUID);
-			Draw.DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_XUID);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_XUID);
 		}
 	}
 }
-void ESP_::BoneESP(bool state)
+void ESP::BoneESP()
 {
-	if (!state)
+	if (!BoneESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -385,104 +414,104 @@ void ESP_::BoneESP(bool state)
 			//Pelvis
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_Pelvis, Screen_Pelvis);
 
-			Draw.DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5); //The Peniiiis
+			Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5); //The Peniiiis
 
 			if (DeathMatch)
 			{
-				Draw.DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Left Leg
-				Draw.DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Right Arm
-				Draw.DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Left Arm
-				Draw.DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Back bone
-				Draw.DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Head
-				Draw.DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Neck -> Backbone connection
-				Draw.DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5);
 
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
 			{
 				//Right leg
-				Draw.DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Left Leg
-				Draw.DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Right Arm
-				Draw.DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Left Arm
-				Draw.DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Back bone
-				Draw.DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Head
-				Draw.DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 
 				//Neck -> Backbone connection
-				Draw.DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 			}
 			else
 			{
 				//Right leg
-				Draw.DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Left Leg
-				Draw.DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Right Arm
-				Draw.DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Left Arm
-				Draw.DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
 				
 				//Back bone
-				Draw.DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Head
-				Draw.DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw.DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
 
 				//Neck -> Backbone connection
-				Draw.DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
 			}
 		}
 	}
 }
 
-void ESP_::ThreeDBoxESP(bool state)
+void ESP::ThreeDBoxESP()
 {
-	if (!state)
+	if (!ThreeDBoxESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -505,20 +534,20 @@ void ESP_::ThreeDBoxESP(bool state)
 		{
 			if (DeathMatch)
 			{
-				Draw.Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
-				Draw.Draw3DBox(Entity[i]->Origin, 40, 80, ColorGreen, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorGreen, Engine.RegisterShader_("white"));
 			else
-				Draw.Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
 		}
 	}
 }
 
-void ESP_::WeaponESP(bool state)
+void ESP::WeaponESP()
 {
-	if (!state)
+	if (!WeaponESPEnabled)
 		return;
 	Entity_T* Entity[2048];
 	float oldangle = 0;
@@ -526,7 +555,7 @@ void ESP_::WeaponESP(bool state)
 	{
 		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
 
-
+		
 		if (Entity[i]->Type == Entity_Type::Item && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
@@ -537,34 +566,34 @@ void ESP_::WeaponESP(bool state)
 			{
 				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-				float Distance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(WorldPos)) / 500;
+				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
 				if (Weapon->weaponName[17] == 'B' && Weapon->weaponName[18] == 'A' && Weapon->weaponName[19] == 'G')
-					Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
 				else
-					Draw.DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponShader);
+					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponShader);
 			}
 		}
-		if (Entity[i]->Type == Entity_Type::Player_Corpse)
+		if (Entity[i]->Type == Entity_Type::Player_Corpse && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-			float Distance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(WorldPos)) / 500;
-			Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "headicon_dead");
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+			Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "headicon_dead");
 		}
-		if (Entity[i]->Type == Entity_Type::Turret)
+		if (Entity[i]->Type == Entity_Type::Turret && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-			float Distance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(WorldPos)) / 500;
-			Draw.DrawShaderByInt(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->weaponShader);
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+			Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->weaponShader);
 
 		}
-		if (Entity[i]->Type == Entity_Type::Explosive)
+		if (Entity[i]->Type == Entity_Type::Explosive && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
@@ -574,29 +603,29 @@ void ESP_::WeaponESP(bool state)
 			{
 				//Look here : http://denkirson.proboards.com/thread/4482 and here http://gaming.stackexchange.com/questions/118448/grenade-blast-radius
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-				float Distance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(WorldPos)) / 500;
+				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
 				if (strstr(Weapon->modelName, "frag_grenade_mp") || strstr(Weapon->modelName, "semtex"))
 				{
-					Draw.DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->weaponShader);
-					Draw.DrawCirlceSplashDamage(Entity[i]->Origin, 248.031, ColorRed); //6,3 meters in inch; 
+					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->weaponShader);
+					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 248.031, ColorRed); //6,3 meters in inch; 
 				}
 				if (strstr(Weapon->modelName, "flash_grenade_mp"))
 				{
-					Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "hud_flashbangicon");
-					Draw.DrawCirlceSplashDamage(Entity[i]->Origin, 708.661, ColorOrange);
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "hud_flashbangicon");
+					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 708.661, ColorOrange);
 				}
 				if (strstr(Weapon->modelName, "throwingknife_mp"))
-					Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "equipment_throwing_knife");
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "equipment_throwing_knife");
 				if (strstr(Weapon->modelName, "smoke_grenade_mp"))
-					Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_smokegrenade");
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_smokegrenade");
 				if (strstr(Weapon->modelName, "concussion_grenade_mp"))
 				{
-					Draw.DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_concgrenade");
-					Draw.DrawCirlceSplashDamage(Entity[i]->Origin, 472.441, ColorOrange);
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_concgrenade");
+					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 472.441, ColorOrange);
 				}
 			}
 		}
-		if (Entity[i]->Type == Entity_Type::Helicopter)
+		if (Entity[i]->Type == Entity_Type::Helicopter && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
@@ -604,10 +633,10 @@ void ESP_::WeaponESP(bool state)
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			if (Weapon->weaponName != NULL)
 			{
-				Draw.DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
+				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
 			}
 		}
-		if (Entity[i]->Type == Entity_Type::Plane)
+		if (Entity[i]->Type == Entity_Type::Plane && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
 			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
@@ -615,15 +644,15 @@ void ESP_::WeaponESP(bool state)
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			if (Weapon->weaponName != NULL)
 			{
-				Draw.DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
+				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
 			}
 		}
 	}
 }
 
-void ESP_::SnaplineESP(bool state)
+void ESP::SnaplineESP()
 {
-	if (!state)
+	if (!SnaplineESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -652,21 +681,21 @@ void ESP_::SnaplineESP(bool state)
 
 			if (DeathMatch)
 			{
-				Draw.DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
-				Draw.DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorGreen, Engine.RegisterShader_("white"), 2);
 			else
-				Draw.DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
 		}
 
 	}
 }
 
-void ESP_::ShaderESP(bool state)
+void ESP::ShaderESP()
 {
-	if (!state)
+	if (!ShaderESPEnabled)
 		return;
 	Entity_T* Entity[18];
 	ClientInfo_T* Client[18];
@@ -694,29 +723,14 @@ void ESP_::ShaderESP(bool state)
 				return;
 
 
-			float Distance = Math.GetDistance(RefDef->Origin, Utils.ParseVec(TagPos_Head)) / 500;
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head)) / 500;
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
 
 			if (Client[i]->Team != LocalClient->Team)
-				Draw.DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80 / Distance, 60 / Distance, ColorWhite, "waypoint_kill");
+				Draw::DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80 / Distance, 60 / Distance, ColorWhite, "waypoint_kill");
 			else
-				Draw.DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80, 60, ColorWhite, "waypoint_defend");
+				Draw::DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80, 60, ColorWhite, "waypoint_defend");
 		}
 
 	}
-}
-
-void ESP_::Wrapper()
-{
-	CirlceESP(CircleESPEnabled);
-	BoneESP(BoneESPEnabled);
-	ThreeDBoxESP(ThreeDBoxESPEnabled);
-	WeaponESP(WeaponESPEnabled);
-	SnaplineESP(SnaplineESPEnabled);
-	ShaderESP(ShaderESPEnabled);
-	NameESP(NameESPEnabled);
-	XUIDESP(XUIDESPEnabled);
-	RankESP(RankESPEnabled);
-	SlotESP(SlotESPEnabled);
-	Misc.Crosshair(Misc.CrosshairEnabled);
 }

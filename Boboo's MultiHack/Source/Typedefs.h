@@ -22,3 +22,4 @@ typedef void(__cdecl* CG_Trace_t) (Trace_t* results, vec3_t start, vec3_t End, i
 typedef bool(__cdecl* CL_IsEntityVisible_t)(int, int*);
 typedef int(__cdecl* MessageGiver_t)(int, char*, ...);
 
+

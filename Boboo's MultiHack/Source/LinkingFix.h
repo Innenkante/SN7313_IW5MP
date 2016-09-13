@@ -25,11 +25,6 @@ static vec4_t ColorOrange = { 255.f, 165.f, 0.0f,1.0f };
 static vec4_t ColorPink = { 255, 15, 211, 1 };
 
 static Engine_ Engine;
-static Draw_ Draw;
-static Utils_ Utils;
-static Misc_ Misc;
-static Math_ Math;
-static Menu_ Menu;
 static Hook_ Hook;
-static ESP_ ESP;
-static Aimbot_ Aimbot;
+
+

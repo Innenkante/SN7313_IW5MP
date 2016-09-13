@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-Utils_ Utils;
+
 bool Engine_::GetTagPos(Entity_T * ent, char * tagname, float * out)
 {
 	WORD wTag = RegisterTag_(tagname);
@@ -19,19 +19,6 @@ bool Engine_::GetTagPos(Entity_T * ent, char * tagname, float * out)
 	}
 
 	return true;
-}
-
-void Engine_::SendCommandToConsole(char * CMD)
-{
-	DWORD dwCall = SENDCOMMANDTOCONSOLEOFF;
-	__asm
-	{
-		push CMD;
-		push 0;
-		push 0;
-		call dwCall;
-		add esp, 0xC;
-	}
 }
 
 weapon_t * Engine_::GetWeapon(int WeaponID)
@@ -59,7 +46,7 @@ void Engine_::Shoot()
 	*Scoped = 1;
 	if (Shooting)
 		Input->Weapon.Pressed = 1;
-	Shooting = Utils.ChangeState(Shooting);
+	Shooting = Utils::ChangeState(Shooting);
 }
 
 bool Engine_::IsVisible(int ClientNumber)

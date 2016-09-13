@@ -1,7 +1,7 @@
 #pragma once
 
 
-class Engine_
+static class Engine_
 {
 public:
 	DrawEngineText_t DrawEngineText_ = (DrawEngineText_t)DRAWENGINETEXTOFF;
@@ -13,12 +13,11 @@ public:
 	RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
 	ProcessCMD ProcessCMD_ = (ProcessCMD)0x429920;
 	bool GetTagPos(Entity_T* ent, char* tagname, float* out);
-	void SendCommandToConsole(char* CMD);
 	weapon_t* GetWeapon(int WeaponID);
 	Trace_t TraceToTarget(float* TargetVector);
 	void Shoot();
 	bool IsVisible(int ClientNumber);
-	MessageGiver_t MessageGiver = (MessageGiver_t)0x004A6660;
+	MessageGiver_t MessageGiver_ = (MessageGiver_t)0x004A6660;
 	int GetXUID(int ClientNumber);
 private:
 	CG_Trace_t Trace_ = (CG_Trace_t)0x55A820;

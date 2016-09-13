@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-Vector2D Utils_::ParsVec(float ScreenInFloat[2])
+Vector2D Utils::ParsVec(float ScreenInFloat[2])
 {
 	Vector2D vec(0, 0);
 	vec.x = ScreenInFloat[0];
@@ -8,7 +8,7 @@ Vector2D Utils_::ParsVec(float ScreenInFloat[2])
 	return vec;
 }
 
-Vector3D Utils_::ParseVec(float PointInFloat[3])
+Vector3D Utils::ParseVec(float PointInFloat[3])
 {
 	Vector3D vec(0, 0, 0);
 	vec.x = PointInFloat[0];
@@ -17,11 +17,33 @@ Vector3D Utils_::ParseVec(float PointInFloat[3])
 	return vec;
 }
 
-bool Utils_::ChangeState(bool state)
+bool Utils::ChangeState(bool state)
 {
 	if (state)
 		state = false;
 	else
 		state = true;
 	return state;
+}
+
+char* Utils::GetStateAsWord(bool state)
+{
+	if (state)
+		return "On";
+	else
+		return "Off";
+}
+
+char * Utils::IntToChar(int num)
+{
+	char buf[1024];
+	sprintf_s(buf, "%d", num);
+	return buf;
+}
+
+char * Utils::FloatToChar(float num)
+{
+	char buf[1024];
+	sprintf_s(buf, "%f", num);
+	return buf;
 }

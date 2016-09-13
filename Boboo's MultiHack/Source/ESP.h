@@ -1,33 +1,31 @@
 #pragma once
 
-class ESP_
+
+class ESP
 {
 public:
-	bool CircleESPEnabled; //0
-	bool BoneESPEnabled;//1
-	bool NameESPEnabled;
-	bool SlotESPEnabled;
-	bool RankESPEnabled;
-	bool DistanceESPEnabled;
-	bool ScoreESPEnabled;
-	bool XUIDESPEnabled;
-	bool ThreeDBoxESPEnabled;
-	bool WeaponESPEnabled;
-	bool SnaplineESPEnabled;
-	bool ShaderESPEnabled;
-	void CirlceESP(bool state);
-	void BoneESP(bool state);
-	void NameESP(bool state);
-	void SlotESP(bool state);
-	void RankESP(bool state);
-	void DistanceESP(bool state);
-	void XUIDESP(bool state);
-	void ThreeDBoxESP(bool state);
-	void WeaponESP(bool state);
-	void SnaplineESP(bool state);
-	void ShaderESP(bool state);
-	void Wrapper();
+	static bool CircleESPEnabled;
+	static bool BoneESPEnabled;//1
+	static bool NameESPEnabled;
+	static bool SlotESPEnabled;
+	static bool RankESPEnabled;
+	static bool DistanceESPEnabled;
+	static bool XUIDESPEnabled;
+	static bool ThreeDBoxESPEnabled;
+	static bool WeaponESPEnabled;
+	static bool SnaplineESPEnabled;
+	static bool ShaderESPEnabled;
+	static void Wrapper();
 private:
-
+	static void CirlceESP();
+	static void NameESP();
+	static void SlotESP();
+	static void RankESP();
+	static void DistanceESP();
+	static void XUIDESP();
+	static void BoneESP();
+	static void ThreeDBoxESP();
+	static void WeaponESP();
+	static void SnaplineESP();
+	static void ShaderESP();
 };
-
