@@ -13,7 +13,7 @@ public:
 	RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
 	ProcessCMD ProcessCMD_ = (ProcessCMD)0x429920;
 	bool GetTagPos(Entity_T* ent, char* tagname, float* out);
-	weapon_t* GetWeapon(int WeaponID);
+	Weapon_t* GetWeapon(int WeaponID);
 	Trace_t TraceToTarget(float* TargetVector);
 	void Shoot();
 	bool IsVisible(int ClientNumber);

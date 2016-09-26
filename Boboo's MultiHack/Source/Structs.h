@@ -243,25 +243,29 @@ typedef struct {
 
 typedef struct 
 {
-	const char * modelName;
-	void * m_weaponDef;
-	const char * weaponName;
+	const char * ModelName;
+	void * WeaponDef;
+	const char * WeaponName;
 	char _pad[120];
-	int* weaponShader;
-}weapon_t;
+	int* WeaponShader;
+}Weapon_t;
 
 
-typedef struct
+typedef struct BulletTrace_t
 {
-	int		worldEntNum;	// 00
-	int		skipNum;		// 04
-	float	power;			// 08
-	int		bulletType;		// 12
+	BulletTrace_t() : Vieworg(0, 0, 0), Start(0, 0, 0), End(0, 0, 0), ViewDirection(0, 0, 0)
+	{
+
+	}
+	int		WorldEntNum;	// 00
+	int		SkipNum;		// 04
+	float	Power;			// 08
+	int		BulletType;		// 12
 	char	Buttons[4];		// 16
-	float vieworg[3];		// 28
-	float	start[3];			// 40
-	float	end[3];			// 28
-	float	viewDirection[3];	// 32
+	Vector3D Vieworg;		// 28
+	Vector3D	Start;			// 40
+	Vector3D	End;			// 28
+	Vector3D	ViewDirection;	// 32
 }BulletTrace_t;
 
 

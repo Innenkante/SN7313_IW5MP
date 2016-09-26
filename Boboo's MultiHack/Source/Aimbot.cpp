@@ -277,11 +277,13 @@ void Aimbot::BestTraceAimbot(float MinTraceVal)
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
 
-	weapon_t* CurrentWeapon = Engine.GetWeapon(Entity[cg->ClientNumber]->WeaponID);
-	if (strstr(CurrentWeapon->modelName, "msr") || strstr(CurrentWeapon->modelName, "l96a1"))
+	Weapon_t* CurrentWeapon = Engine.GetWeapon(Entity[cg->ClientNumber]->WeaponID);
+	if (strstr(CurrentWeapon->ModelName, "msr") || strstr(CurrentWeapon->ModelName, "l96a1"))
 		return;
 	Engine.Shoot();
 }
+
+
 
 void Aimbot::Wrapper()
 {

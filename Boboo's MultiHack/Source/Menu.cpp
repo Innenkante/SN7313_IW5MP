@@ -105,8 +105,8 @@ void Menu::DrawMiscOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Chat Spam");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::ChatSpamEnabled));
 
-
-
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "No Gun");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoGunEnabled));
 }
 
 void Menu::DrawUtilsOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
@@ -393,10 +393,24 @@ void Menu::SwitchOnOrOff(int Key)
 			if (Key)
 			{
 				Misc::ChatSpamEnabled = true;
+				Engine.ProcessCMD_(0, "say DEBUG:ChatSpam enabled successfully");
+				Sleep(100);
 			}
 			else
 			{
 				Misc::ChatSpamEnabled = false;
+			}
+			break;
+		case 6:
+			if (Key)
+			{
+				Misc::NoGunEnabled = true;
+				Misc::NoGun();
+			}
+			else
+			{
+				Misc::NoGunEnabled = false;
+				Misc::NoGun();
 			}
 			break;
 		default:

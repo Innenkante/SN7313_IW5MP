@@ -21,9 +21,9 @@ bool Engine_::GetTagPos(Entity_T * ent, char * tagname, float * out)
 	return true;
 }
 
-weapon_t * Engine_::GetWeapon(int WeaponID)
+Weapon_t * Engine_::GetWeapon(int WeaponID)
 {
-	return*(weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
+	return*(Weapon_t**)(0x008DDB50 + 0x04 * WeaponID);
 }
 
 Trace_t Engine_::TraceToTarget(float * TargetVector)

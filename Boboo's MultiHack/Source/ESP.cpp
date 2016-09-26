@@ -558,19 +558,19 @@ void ESP::WeaponESP()
 		
 		if (Entity[i]->Type == Entity_Type::Item && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
-			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
+			Weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponName != NULL)
+			if (Weapon->WeaponName != NULL)
 			{
 				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
-				if (Weapon->weaponName[17] == 'B' && Weapon->weaponName[18] == 'A' && Weapon->weaponName[19] == 'G')
+				if (Weapon->WeaponName[17] == 'B' && Weapon->WeaponName[18] == 'A' && Weapon->WeaponName[19] == 'G')
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
 				else
-					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->weaponShader);
+					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->WeaponShader);
 			}
 		}
 		if (Entity[i]->Type == Entity_Type::Player_Corpse && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
@@ -584,41 +584,41 @@ void ESP::WeaponESP()
 		}
 		if (Entity[i]->Type == Entity_Type::Turret && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
-			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
+			Weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
-			Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->weaponShader);
+			Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->WeaponShader);
 
 		}
 		if (Entity[i]->Type == Entity_Type::Explosive && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
-			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
+			Weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponName != NULL)
+			if (Weapon->WeaponName != NULL)
 			{
 				//Look here : http://denkirson.proboards.com/thread/4482 and here http://gaming.stackexchange.com/questions/118448/grenade-blast-radius
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
-				if (strstr(Weapon->modelName, "frag_grenade_mp") || strstr(Weapon->modelName, "semtex"))
+				if (strstr(Weapon->ModelName, "frag_grenade_mp") || strstr(Weapon->ModelName, "semtex"))
 				{
-					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->weaponShader);
+					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->WeaponShader);
 					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 248.031, ColorRed); //6,3 meters in inch; 
 				}
-				if (strstr(Weapon->modelName, "flash_grenade_mp"))
+				if (strstr(Weapon->ModelName, "flash_grenade_mp"))
 				{
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "hud_flashbangicon");
 					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 708.661, ColorOrange);
 				}
-				if (strstr(Weapon->modelName, "throwingknife_mp"))
+				if (strstr(Weapon->ModelName, "throwingknife_mp"))
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "equipment_throwing_knife");
-				if (strstr(Weapon->modelName, "smoke_grenade_mp"))
+				if (strstr(Weapon->ModelName, "smoke_grenade_mp"))
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_smokegrenade");
-				if (strstr(Weapon->modelName, "concussion_grenade_mp"))
+				if (strstr(Weapon->ModelName, "concussion_grenade_mp"))
 				{
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorOrange, "weapon_concgrenade");
 					Draw::DrawCirlceSplashDamage(Entity[i]->Origin, 472.441, ColorOrange);
@@ -627,24 +627,24 @@ void ESP::WeaponESP()
 		}
 		if (Entity[i]->Type == Entity_Type::Helicopter && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
-			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
+			Weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponName != NULL)
+			if (Weapon->WeaponName != NULL)
 			{
-				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
+				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->WeaponShader);
 			}
 		}
 		if (Entity[i]->Type == Entity_Type::Plane && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
 		{
-			weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
+			Weapon_t* Weapon = Engine.GetWeapon(Entity[i]->WeaponID);
 			float ScreenPos[2];
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z + 50 };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
-			if (Weapon->weaponName != NULL)
+			if (Weapon->WeaponName != NULL)
 			{
-				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->weaponShader);
+				Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80, 60, ColorWhite, Weapon->WeaponShader);
 			}
 		}
 	}

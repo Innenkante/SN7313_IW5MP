@@ -9,7 +9,8 @@ bool Misc::FullBrightEnabled = false;
 bool Misc::CrosshairEnabled = false;
 bool Misc::LaserEnabled = false;
 bool Misc::ChatSpamEnabled = false;
-int Misc::OldKillCount;
+int Misc::OldKillCount = 0;
+bool Misc::NoGunEnabled = false;
 
 
 void Misc::NoRecoil()
@@ -159,18 +160,20 @@ void Misc::ChatSpam()
 {
 	if (!ChatSpamEnabled)
 		return;
-	int* KillCount = (int*)0xA03DCC;
-	if (*KillCount == OldKillCount)
+
+	int KillCount = *(int*)0x335F6DF4;
+	if (KillCount == 0)
 	{
-		return;
+		OldKillCount == 0;
 	}
 
-	if (*KillCount > 0)
+	if (KillCount > OldKillCount)
 	{
 		char* OpponenetsName = (char*)0x058C379E;
 		char Buf[128];
-		sprintf_s(Buf, "say %s ^1got ^2rekt ^3by ^5SN7313 ^4Download ^;at ^:mpgh.net");
-		OldKillCount = *KillCount;
+		sprintf_s(Buf, "say %s ^1got ^2rekt ^3by ^5SN7313 ^4Download ^;at ^:mpgh.net",*OpponenetsName);
+		Engine.ProcessCMD_(0, Buf);
+		OldKillCount = KillCount;
 	}
 
 }
@@ -186,4 +189,22 @@ void Misc::VoteKickPlayerExploit()
 	char Buffer[64];
 	sprintf_s(Buffer, "callvote kick %s", Name);
 	Engine.ProcessCMD_(0, Buffer);
+}
+
+void Misc::NoGun()
+{
+	int* PosZ = (int*)0x59D3938;
+	int* PosX = (int*)0x59D3984;
+	if (NoGunEnabled)
+	{
+		*PosZ = -1;
+		*PosX = -2;
+	}
+	else
+	{
+		*PosZ = 0;
+		*PosX = 0;
+	}
+	
+	
 }

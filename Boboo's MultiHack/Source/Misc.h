@@ -8,6 +8,7 @@ public:
 	static bool CrosshairEnabled;
 	static bool LaserEnabled;
 	static bool ChatSpamEnabled;
+	static bool NoGunEnabled;
 	static void NoRecoil();
 	static void NoSpread();
 	static void FullBright();
@@ -24,6 +25,7 @@ public:
 	static void ChatSpam();
 	static void Wrapper();
 	static void VoteKickPlayerExploit();
+	static void NoGun();
 	static int OldKillCount;
 private:
 

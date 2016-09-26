@@ -40,6 +40,8 @@
 #include "Misc.h"
 #include "Hooking.h"
 #include "ESP.h"
+#include "NoSpread.h"
+#include "AutoWall.h"
 
 
 #define ScaleRadarX(x)(x * (640.0f / RefDef->Width ) )

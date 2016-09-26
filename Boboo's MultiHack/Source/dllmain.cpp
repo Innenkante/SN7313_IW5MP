@@ -93,7 +93,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 			}
 			if (Menu::CurrentActiveMenu == Menu::MiscMenuTab)
 			{
-				if (Menu::OptionNumber != 5)
+				if (Menu::OptionNumber != 6)
 					Menu::OptionNumber++;
 				else
 					Menu::OptionNumber = 0;
@@ -130,7 +130,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 				if (Menu::OptionNumber != 0)
 					Menu::OptionNumber--;
 				else
-					Menu::OptionNumber = 5;
+					Menu::OptionNumber = 6;
 			}
 			if (Menu::CurrentActiveMenu == Menu::UtilsMenuTab)
 			{
@@ -187,7 +187,7 @@ __declspec(naked) void hkDraw2D()
 {
 	__asm PUSHAD
 	__asm PUSHFD
-
+	//NoSpread::Wrapper();
 	Aimbot::Wrapper();
 	__asm POPFD
 	__asm POPAD
