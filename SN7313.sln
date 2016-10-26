@@ -5,8 +5,6 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SN7313-TeknoMW3-Private", "Boboo's MultiHack\Boboo's MultiHack.vcxproj", "{D8A45E40-7E05-4296-B757-BF59AD9BCBD0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SN7313-ReactMW2-Private", "SN7313-ReactMW2-Private\SN7313-ReactMW2-Private.vcxproj", "{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,14 +21,6 @@ Global
 		{D8A45E40-7E05-4296-B757-BF59AD9BCBD0}.Release|x64.Build.0 = Release|x64
 		{D8A45E40-7E05-4296-B757-BF59AD9BCBD0}.Release|x86.ActiveCfg = Release|Win32
 		{D8A45E40-7E05-4296-B757-BF59AD9BCBD0}.Release|x86.Build.0 = Release|Win32
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Debug|x64.ActiveCfg = Debug|x64
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Debug|x64.Build.0 = Debug|x64
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Debug|x86.ActiveCfg = Debug|Win32
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Debug|x86.Build.0 = Debug|Win32
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Release|x64.ActiveCfg = Release|x64
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Release|x64.Build.0 = Release|x64
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Release|x86.ActiveCfg = Release|Win32
-		{C4D63CDB-30EF-4A96-AC75-F8537DDA8A71}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

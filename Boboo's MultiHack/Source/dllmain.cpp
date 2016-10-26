@@ -79,7 +79,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 		{
 			if (Menu::CurrentActiveMenu == Menu::ESPMenuTab)
 			{
-				if (Menu::OptionNumber != 10)
+				if (Menu::OptionNumber != 12)
 					Menu::OptionNumber++;
 				else
 					Menu::OptionNumber = 0;
@@ -116,7 +116,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 				if (Menu::OptionNumber != 0)
 					Menu::OptionNumber--;
 				else
-					Menu::OptionNumber = 10;
+					Menu::OptionNumber = 12;
 			}
 			if (Menu::CurrentActiveMenu == Menu::AimbotMenuTab)
 			{
@@ -187,7 +187,6 @@ __declspec(naked) void hkDraw2D()
 {
 	__asm PUSHAD
 	__asm PUSHFD
-	//NoSpread::Wrapper();
 	Aimbot::Wrapper();
 	__asm POPFD
 	__asm POPAD
@@ -201,16 +200,16 @@ __declspec(naked) void hkDraw2D()
 
 #pragma endregion
 
-#include <detours.h>
+
 BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {
 	if (Reason == DLL_PROCESS_ATTACH) {
 		Init();
 		Hook.DetourFunction((PBYTE)0x0064427B, (PBYTE)hkShowList, 5); 
 		Hook.DetourFunction((PBYTE)0x430430, (PBYTE)hkDraw2D, 6); 
-		CreateThread(NULL, 0, &KeyBoardHook, NULL, 0, NULL); //Creating the Thread
+		CreateThread(NULL, 0, &KeyBoardHook, NULL, 0, NULL);
 	}
-
 	return TRUE;
 }
+
 

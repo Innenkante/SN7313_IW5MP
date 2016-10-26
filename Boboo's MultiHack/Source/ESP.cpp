@@ -13,6 +13,8 @@ bool ESP::ThreeDBoxESPEnabled = false;
 bool ESP::WeaponESPEnabled = false; 
 bool ESP::SnaplineESPEnabled = false;
 bool ESP::ShaderESPEnabled = false;
+bool ESP::TriangleESPEnabled = false;
+bool ESP::VisibleESPEnabled = false;
 
 
 void ESP::Wrapper()
@@ -28,6 +30,9 @@ void ESP::Wrapper()
 	WeaponESP();
 	SnaplineESP();
 	ShaderESP();
+	//need bools and place in menu
+	TriangleESP();
+	VisibleESP();
 }
 
 void ESP::CirlceESP()
@@ -716,20 +721,116 @@ void ESP::ShaderESP()
 		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
 		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
 		{
-			float TagPos_Head[3];
+			float TagPos_Shoulder_ri[3];
 			float Screen_Pos[2];
 
-			if (!Engine.GetTagPos(Entity[i], "j_shoulder_ri", TagPos_Head))
+			if (!Engine.GetTagPos(Entity[i], "j_shoulder_ri", TagPos_Shoulder_ri))
 				return;
 
 
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head)) / 500;
-			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Shoulder_ri)) / 500;
+			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Shoulder_ri, Screen_Pos);
 
 			if (Client[i]->Team != LocalClient->Team)
 				Draw::DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80 / Distance, 60 / Distance, ColorWhite, "waypoint_kill");
 			else
 				Draw::DrawShaderByName(Screen_Pos[0], Screen_Pos[1], 80, 60, ColorWhite, "waypoint_defend");
+		}
+
+	}
+}
+
+void ESP::TriangleESP()
+{
+	if (!TriangleESPEnabled)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Client[18];
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	RefDef_T* RefDef = (RefDef_T*)(REFDEFOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
+		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
+		{
+			float TagPos_Head[3];
+			float Screen_Pos[2];
+
+			if (!Engine.GetTagPos(Entity[i], "j_head", TagPos_Head))
+				return;
+
+
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head));
+			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
+
+			if (Client[i]->Team != LocalClient->Team)
+			{
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20,ColorRed,Engine.RegisterShader_("white"),3);
+			}
+			else
+			{
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
+			}
+				
+		}
+
+	}
+}
+
+void ESP::VisibleESP()
+{
+	if (!VisibleESPEnabled)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Client[18];
+	CG_T* cg = (CG_T*)(CGOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+	CGS_T * CGS = (CGS_T*)(CGSOFF);
+	RefDef_T* RefDef = (RefDef_T*)(REFDEFOFF);
+	bool DeathMatch = false;
+
+	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
+	{
+		DeathMatch = true;
+	}
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
+		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
+		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
+		{
+			float TagPos_Head[3];
+			float Screen_Pos[2];
+
+			if (!Engine.GetTagPos(Entity[i], "j_head", TagPos_Head))
+				return;
+
+
+			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head));
+			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
+
+			char bufVisible[32];
+			if (Engine.IsVisible(Entity[i]->ClientNumber))
+				sprintf_s(bufVisible, "Visible:^2Yes");
+			else
+				sprintf_s(bufVisible, "Visible:^1No");
+
+			Draw::DrawTextMW3(Screen_Pos[0] + 32, Screen_Pos[1] + 48, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, bufVisible);
 		}
 
 	}

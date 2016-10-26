@@ -15,6 +15,8 @@ public:
 	static bool WeaponESPEnabled;
 	static bool SnaplineESPEnabled;
 	static bool ShaderESPEnabled;
+	static bool TriangleESPEnabled;
+	static bool VisibleESPEnabled;
 	static void Wrapper();
 private:
 	static void CirlceESP();
@@ -28,4 +30,6 @@ private:
 	static void WeaponESP();
 	static void SnaplineESP();
 	static void ShaderESP();
+	static void TriangleESP();
+	static void VisibleESP();
 };
