@@ -740,7 +740,7 @@ void ESP::ShaderESP()
 	}
 }
 
-void ESP::TriangleESP()
+void ESP::TriangleESP() //TODO scaling it properly! => 
 {
 	if (!TriangleESPEnabled)
 		return;

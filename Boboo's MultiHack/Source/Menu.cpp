@@ -60,7 +60,7 @@ void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::TriangleESPEnabled));
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Visible:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
 	
 
 }
