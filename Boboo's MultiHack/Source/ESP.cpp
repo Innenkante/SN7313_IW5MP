@@ -573,7 +573,7 @@ void ESP::WeaponESP()
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
 				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
 				if (Weapon->WeaponName[17] == 'B' && Weapon->WeaponName[18] == 'A' && Weapon->WeaponName[19] == 'G')
-					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "specialty_scavenger");
+					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "scavenger_pickup"); //Kenshin <3
 				else
 					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, Weapon->WeaponShader);
 			}

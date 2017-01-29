@@ -58,3 +58,4 @@ int Engine_::GetXUID(int ClientNumber)
 {
 	return *(int*)(*(DWORD *)0x132C3A0 + 0x60 + (0x40 * ClientNumber));
 }
+
