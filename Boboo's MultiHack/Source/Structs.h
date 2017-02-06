@@ -10,6 +10,13 @@ public:
 		y = yC;
 		z = zC;
 	}
+
+	Vector3D(float* vec_array)
+	{
+		x = vec_array[0];
+		y = vec_array[1];
+		z = vec_array[2];
+	}
 };
 
 struct Vector2D
@@ -21,6 +28,12 @@ public:
 	{
 		x = xC;
 		y = yC;
+	}
+
+	Vector2D(float* vec_array)
+	{
+		x = vec_array[0];
+		y = vec_array[1];
 	}
 };
 typedef struct

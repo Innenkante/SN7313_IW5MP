@@ -57,7 +57,7 @@ void Aimbot::ClosestAimbot(char * Bone)
 
 
 
-				float CurrentDistance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_bone));
+				float CurrentDistance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_bone));
 				if (CurrentDistance < ClosestDistance)
 				{
 					ClosestPlayerClientNumber = Entity[i]->ClientNumber;
@@ -77,7 +77,7 @@ void Aimbot::ClosestAimbot(char * Bone)
 			if (Tmp.fraction < 0.87f)
 				continue;
 
-			float CurrentDistance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_bone));
+			float CurrentDistance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_bone));
 			if (CurrentDistance < ClosestDistance)
 			{
 				ClosestPlayerClientNumber = Entity[i]->ClientNumber;
@@ -91,7 +91,7 @@ void Aimbot::ClosestAimbot(char * Bone)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
-	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Vector3D(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -140,7 +140,7 @@ void Aimbot::InScreenRangeAimbot(char * Bone,int FieldOfAim)
 					return;
 				Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_bone);
 				float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
-				float DistancePlayerBoneToScreenCenter = Math::GetDistance(Utils::ParseVec(PlayerScreenCenter), Utils::ParseVec(Screen_bone));
+				float DistancePlayerBoneToScreenCenter = Math::GetDistance(Vector3D(PlayerScreenCenter), Vector3D(Screen_bone));
 
 				if (!Engine.IsVisible(Entity[i]->ClientNumber))
 					continue;
@@ -163,7 +163,7 @@ void Aimbot::InScreenRangeAimbot(char * Bone,int FieldOfAim)
 				return;
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_bone);
 			float PlayerScreenCenter[] = { RefDef->Width / 2, RefDef->Height / 2 };
-			float DistancePlayerBoneToScreenCenter = Math::GetDistance(Utils::ParseVec(PlayerScreenCenter), Utils::ParseVec(Screen_bone));
+			float DistancePlayerBoneToScreenCenter = Math::GetDistance(Vector3D(PlayerScreenCenter), Vector3D(Screen_bone));
 
 			if (!Engine.IsVisible(Entity[i]->ClientNumber)) 
 				continue;
@@ -183,7 +183,7 @@ void Aimbot::InScreenRangeAimbot(char * Bone,int FieldOfAim)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber], Bone, AimAt);
-	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Vector3D(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;
@@ -269,7 +269,7 @@ void Aimbot::BestTraceAimbot(float MinTraceVal)
 
 	float AimAt[3];
 	Engine.GetTagPos(Entity[ClosestPlayerClientNumber],Bones_Collection[BestBoneID], AimAt);
-	Angles = Math::CalcAngles(RefDef->Origin, Utils::ParseVec(AimAt), RefDef->ViewAxis);
+	Angles = Math::CalcAngles(RefDef->Origin, Vector3D(AimAt), RefDef->ViewAxis);
 
 	float* ViewX = (float*)0x0106389C;
 	float* ViewY = (float*)0x01063898;

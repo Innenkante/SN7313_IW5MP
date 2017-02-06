@@ -23,7 +23,6 @@
 #include <d3d.h>
 #include <map>
 #include <functional>
-#include <detours.h>
 //
 
 

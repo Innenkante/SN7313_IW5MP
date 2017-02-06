@@ -78,13 +78,13 @@ void ESP::CirlceESP()
 
 			if (DeathMatch)
 			{
-				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorRed);
+				Draw::DrawCirlceOnScreen(Vector2D(Screen_MainRoot), Math::GetDistance(Vector2D(Screen_MainRoot), Vector2D(Screen_head)), ColorRed);
 				continue;
 			}
 			if (Clients[i]->Team == LocalClient->Team)
-				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorGreen);
+				Draw::DrawCirlceOnScreen(Vector2D(Screen_MainRoot), Math::GetDistance(Vector2D(Screen_MainRoot), Vector2D(Screen_head)), ColorGreen);
 			else
-				Draw::DrawCirlceOnScreen(Utils::ParsVec(Screen_MainRoot), Math::GetDistance(Utils::ParsVec(Screen_MainRoot), Utils::ParsVec(Screen_head)), ColorRed);
+				Draw::DrawCirlceOnScreen(Vector2D(Screen_MainRoot), Math::GetDistance(Vector2D(Screen_MainRoot), Vector2D(Screen_head)), ColorRed);
 
 		}
 	}
@@ -233,7 +233,7 @@ void ESP::DistanceESP()
 			ScreenMatrix* Matrix = Engine.GetScreenMatrix_();
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Distance[1024];
-			float distance = Math::GetDistance(refdef->Origin, Utils::ParseVec(TagPos_head));
+			float distance = Math::GetDistance(refdef->Origin, Vector3D(TagPos_head));
 			sprintf_s(buf_Distance, "^3 %f ", distance);
 			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
 		}
@@ -571,7 +571,7 @@ void ESP::WeaponESP()
 			{
 				//DrawTextMW3(ScreenPos[0], ScreenPos[1], RegisterFont(FONT_SMALL_DEV), ColorGreen, Weapon->weaponname);
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+				float Distance = Math::GetDistance(RefDef->Origin, Vector3D(WorldPos)) / 500;
 				if (Weapon->WeaponName[17] == 'B' && Weapon->WeaponName[18] == 'A' && Weapon->WeaponName[19] == 'G')
 					Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorWhite, "scavenger_pickup"); //Kenshin <3
 				else
@@ -584,7 +584,7 @@ void ESP::WeaponESP()
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(WorldPos)) / 500;
 			Draw::DrawShaderByName(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, "headicon_dead");
 		}
 		if (Entity[i]->Type == Entity_Type::Turret && Entity[i]->Valid && Entity[i]->IsAlive & 0x01)
@@ -594,7 +594,7 @@ void ESP::WeaponESP()
 			float WorldPos[] = { Entity[i]->Origin.x,Entity[i]->Origin.y,Entity[i]->Origin.z };
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), WorldPos, ScreenPos);
 			RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(WorldPos)) / 500;
 			Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 60 / Distance, 40 / Distance, ColorWhite, Weapon->WeaponShader);
 
 		}
@@ -608,7 +608,7 @@ void ESP::WeaponESP()
 			{
 				//Look here : http://denkirson.proboards.com/thread/4482 and here http://gaming.stackexchange.com/questions/118448/grenade-blast-radius
 				RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-				float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(WorldPos)) / 500;
+				float Distance = Math::GetDistance(RefDef->Origin, Vector3D(WorldPos)) / 500;
 				if (strstr(Weapon->ModelName, "frag_grenade_mp") || strstr(Weapon->ModelName, "semtex"))
 				{
 					Draw::DrawShaderByInt(ScreenPos[0], ScreenPos[1], 80 / Distance, 60 / Distance, ColorRed, Weapon->WeaponShader);
@@ -728,7 +728,7 @@ void ESP::ShaderESP()
 				return;
 
 
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Shoulder_ri)) / 500;
+			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_Shoulder_ri)) / 500;
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Shoulder_ri, Screen_Pos);
 
 			if (Client[i]->Team != LocalClient->Team)
@@ -770,7 +770,7 @@ void ESP::TriangleESP() //TODO scaling it properly! =>
 				return;
 
 
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head));
+			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_Head));
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
 
 			if (DeathMatch)
@@ -829,7 +829,7 @@ void ESP::VisibleESP()
 				return;
 
 
-			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head));
+			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_Head));
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
 
 			char bufVisible[32];
