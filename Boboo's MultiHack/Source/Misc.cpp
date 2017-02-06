@@ -156,7 +156,7 @@ char * Misc::GetServerIP()
 }
 
 
-void Misc::ChatSpam()
+void Misc::ChatSpam() //TODO fucking get it finally working
 {
 	if (!ChatSpamEnabled)
 		return;
@@ -205,6 +205,5 @@ void Misc::NoGun()
 		*PosZ = 0;
 		*PosX = 0;
 	}
-	
-	
+
 }

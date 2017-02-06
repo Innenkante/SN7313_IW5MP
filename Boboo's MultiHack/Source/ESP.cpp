@@ -773,6 +773,14 @@ void ESP::TriangleESP() //TODO scaling it properly! =>
 			float Distance = Math::GetDistance(RefDef->Origin, Utils::ParseVec(TagPos_Head));
 			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
 
+			if (DeathMatch)
+			{
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
+				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
+				return;
+			}
+			
 			if (Client[i]->Team != LocalClient->Team)
 			{
 				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
