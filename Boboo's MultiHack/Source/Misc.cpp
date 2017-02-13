@@ -11,6 +11,7 @@ bool Misc::LaserEnabled = false;
 bool Misc::ChatSpamEnabled = false;
 int Misc::OldKillCount = 0;
 bool Misc::NoGunEnabled = false;
+char Misc::XUID[] = {};
 
 
 void Misc::NoRecoil()
@@ -125,34 +126,27 @@ void Misc::ChangeTeam()
 
 char* Misc::GetPlayerName()
 {
-	const char* Name = (const char*)PLAYERNAMEOFF;
-	char buf[32] = "";
-	sprintf_s(buf, Name);
-	return buf;
+	char* Name = (char*)PLAYERNAMEOFF;
+	return Name;
 }
 
 char * Misc::GetPlayerXUID()
 {
 	int* ID = (int*)XUIDOFF;
-	char buf[16];
-	sprintf_s(buf, "%ld", *ID);
-	return buf;
+	sprintf_s(XUID, "%d", *ID);
+	return XUID;
 }
 
 char * Misc::GetServerName()
 {
-	const char* ServerName = (const char*)SERVERNAMEOFF;
-	char buf[64] = "";
-	sprintf_s(buf, ServerName);
-	return buf;
+	char* ServerName = (char*)SERVERNAMEOFF;
+	return ServerName;
 }
 
 char * Misc::GetServerIP()
 {
-	const char* ServerIP = (const char*)SERVERIPOFF;
-	char buf[32] = "";
-	sprintf_s(buf, ServerIP);
-	return buf;
+	char* ServerIP = (char*)SERVERIPOFF;
+	return ServerIP;	
 }
 
 

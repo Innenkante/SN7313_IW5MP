@@ -27,6 +27,7 @@ public:
 	static void VoteKickPlayerExploit();
 	static void NoGun();
 	static int OldKillCount;
+	static char XUID[16];
 private:
 
 };

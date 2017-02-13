@@ -74,10 +74,10 @@ void Menu::DrawAimbotOptions(int BasePosX, int BasePosY, int WidthX, int LengthY
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Aimbot::Bones_Collection[Aimbot::AimboneID]);
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "AimField:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::IntToChar(Aimbot::FieldOfAim));
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetAimField());
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Min. TraceValue:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::FloatToChar(Aimbot::MinTraceValue));
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetMinTraceValue());
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Closest Aimbot:");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Aimbot::ClosestAimbotEnabled));

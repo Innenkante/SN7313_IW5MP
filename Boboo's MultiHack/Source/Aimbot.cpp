@@ -10,7 +10,8 @@ int Aimbot:: FieldOfAim = 50;
 int Aimbot::AimboneID = 0;
 float Aimbot::MinTraceValue = 0.82f;
 char* Aimbot::Bones_Collection[] = { "j_head","j_neck","j_spine4","j_wrist_ri","j_wrist_le","j_elbow_ri","j_elbow_le","j_shoulder_ri","j_shoulder_le","j_ankle_ri","j_ankle_le","j_knee_ri","j_knee_le","j_hip_ri","j_hip_le","pelvis","j_mainroot"};
-
+char Aimbot::DisplayFieldOfAim[] = {};
+char Aimbot::DisplayMinTraceValue[] = {};
 
 
 void Aimbot::ClosestAimbot(char * Bone)

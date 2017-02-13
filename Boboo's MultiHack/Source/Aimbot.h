@@ -11,6 +11,8 @@ public:
 	static float MinTraceValue;
 	static char* Bones_Collection[17];
 	static void Wrapper();
+	static char DisplayFieldOfAim[64];
+	static char DisplayMinTraceValue[64];
 private:
 	static void ClosestAimbot(char * Bone);
 	static void InScreenRangeAimbot(char* Bone, int FieldOfAim);

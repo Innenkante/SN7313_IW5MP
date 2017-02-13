@@ -2,11 +2,7 @@
 
 bool Utils::ChangeState(bool state)
 {
-	if (state)
-		state = false;
-	else
-		state = true;
-	return state;
+	return state = !state;
 }
 
 char* Utils::GetStateAsWord(bool state)
@@ -17,16 +13,14 @@ char* Utils::GetStateAsWord(bool state)
 		return "Off";
 }
 
-char * Utils::IntToChar(int num)
+char * Utils::GetAimField()
 {
-	char buf[1024];
-	sprintf_s(buf, "%d", num);
-	return buf;
+	sprintf_s(Aimbot::DisplayFieldOfAim, "%d", Aimbot::FieldOfAim);
+	return Aimbot::DisplayFieldOfAim;
 }
 
-char * Utils::FloatToChar(float num)
+char * Utils::GetMinTraceValue()
 {
-	char buf[1024];
-	sprintf_s(buf, "%f", num);
-	return buf;
+	sprintf_s(Aimbot::DisplayMinTraceValue, "%f", Aimbot::MinTraceValue);
+	return Aimbot::DisplayMinTraceValue;
 }
