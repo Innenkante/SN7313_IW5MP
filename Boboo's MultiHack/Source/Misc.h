@@ -7,7 +7,7 @@ public:
 	static bool FullBrightEnabled;
 	static bool CrosshairEnabled;
 	static bool LaserEnabled;
-	static bool ChatSpamEnabled;
+	static bool IngameConsoleEnabled;
 	static bool NoGunEnabled;
 	static void NoRecoil();
 	static void NoSpread();
@@ -22,9 +22,9 @@ public:
 	static char* GetPlayerXUID();
 	static char* GetServerName();
 	static char* GetServerIP();
-	static void ChatSpam();
 	static void Wrapper();
 	static void VoteKickPlayerExploit();
+	static void IngameConsole();
 	static void NoGun();
 	static int OldKillCount;
 	static char XUID[16];

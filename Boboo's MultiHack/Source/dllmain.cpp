@@ -2,8 +2,6 @@
 #include "stdafx.h"
 #include "LinkingFix.h"
 
-
-//TODO Automatisches Laufen zu dem Nächsten Gegner,für wegfindung CG_Trace benutzen ez Pz
 void Init()
 {
 	Menu::CurrentActiveMenu = Menu::ESPMenuTab;
@@ -27,6 +25,7 @@ void Init()
 	Aimbot::ClosestAimbotEnabled = false;
 	Aimbot::AimAssistEnabled = false;
 }
+
 DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 {
 	//My keyboardhook
@@ -152,7 +151,6 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 			Menu::SwitchOnOrOff(1);
 		}
 	}
-	Misc::ChatSpam();
 	Sleep(10);
 	return 1;
 }
@@ -203,7 +201,8 @@ __declspec(naked) void hkDraw2D()
 
 BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)
 {
-	if (Reason == DLL_PROCESS_ATTACH) {
+	if (Reason == DLL_PROCESS_ATTACH) 
+	{
 		Init();
 		Hook.DetourFunction((PBYTE)0x0064427B, (PBYTE)hkShowList, 5); 
 		Hook.DetourFunction((PBYTE)0x430430, (PBYTE)hkDraw2D, 6); 

@@ -89,7 +89,7 @@ void Draw::DrawRectangle(int x, int y, int x2, int y2, int x3, int y3, int x4, i
 	DrawLine(x4, y4, x, y, Color, Shader, Size);
 }
 
-void Draw::DrawRectangleFilled(int x, int y, float w, float h, float fThick, vec4_t ColorBackground)
+void Draw::DrawRectangleFilled(int x, int y, float w, float h, vec4_t ColorBackground)
 {
 	Engine.DrawRotatedPic_(Engine.GetScreenMatrix_(), x, y, w, h, 0, ColorBackground, Engine.RegisterShader_("white"));
 }

@@ -17,9 +17,9 @@ typedef int* (*RegisterShader_t) (char* ShaderName);
 typedef ScreenMatrix* (*GetScreenMatrix_t)();
 typedef bool(*World2Screen_t)(int unknown, ScreenMatrix* w2scalc, float* vPoint, float* Screen);
 typedef int(__cdecl* RegisterTag_t)(char* Tag);
-typedef int(__cdecl* ProcessCMD)(int* Arg, char* CMD);
 typedef void(__cdecl* CG_Trace_t) (Trace_t* results, vec3_t start, vec3_t End, int passEntity, DWORD Mask);
 typedef bool(__cdecl* CL_IsEntityVisible_t)(int, int*);
 typedef int(__cdecl* MessageGiver_t)(int, char*, ...);
+typedef void(__cdecl* AddReliableCommand_t)(int, char*);
 
 

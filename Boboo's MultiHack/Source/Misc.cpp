@@ -8,7 +8,7 @@ bool Misc::NoSpreadEnabled = false;
 bool Misc::FullBrightEnabled = false;
 bool Misc::CrosshairEnabled = false;
 bool Misc::LaserEnabled = false;
-bool Misc::ChatSpamEnabled = false;
+bool Misc::IngameConsoleEnabled = false;
 int Misc::OldKillCount = 0;
 bool Misc::NoGunEnabled = false;
 char Misc::XUID[] = {};
@@ -105,10 +105,10 @@ void Misc::ForceJugg()
 	char buffer[1024];
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (CLIENTSIZE * cg->ClientNumber));
 	if (LocalClient->Team == 1)
-		sprintf_s(buffer, "cmd mr %d 9 allies", *MagicNum);
+		sprintf_s(buffer, "mr %d 9 allies", *MagicNum);
 	if (LocalClient->Team == 2)
-		sprintf_s(buffer, "cmd mr %d 9 axis", *MagicNum);
-	Engine.ProcessCMD_(0,buffer);
+		sprintf_s(buffer, "mr %d 9 axis", *MagicNum);
+	Engine.AddReliableCommand_(0, buffer);
 }
 
 void Misc::ChangeTeam()
@@ -118,10 +118,10 @@ void Misc::ChangeTeam()
 	char buffer[1024];
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + CLIENTSIZE * cg->ClientNumber);
 	if (LocalClient->Team == 1)
-		sprintf_s(buffer, "cmd mr %d 2 allies", *MagicNum);
+		sprintf_s(buffer, "mr %d 2 allies", *MagicNum);
 	if (LocalClient->Team == 2)
-		sprintf_s(buffer, "cmd mr %d 2 axis", *MagicNum); //This shit aint working right till now :S and thx to Kenny for the menuresponses they are bae
-	Engine.ProcessCMD_(0, buffer);
+		sprintf_s(buffer, "mr %d 2 axis", *MagicNum); 
+	Engine.AddReliableCommand_(0, buffer);
 }
 
 char* Misc::GetPlayerName()
@@ -149,29 +149,6 @@ char * Misc::GetServerIP()
 	return ServerIP;	
 }
 
-
-void Misc::ChatSpam() //TODO fucking get it finally working
-{
-	if (!ChatSpamEnabled)
-		return;
-
-	int KillCount = *(int*)0x335F6DF4;
-	if (KillCount == 0)
-	{
-		OldKillCount == 0;
-	}
-
-	if (KillCount > OldKillCount)
-	{
-		char* OpponenetsName = (char*)0x058C379E;
-		char Buf[128];
-		sprintf_s(Buf, "say %s ^1got ^2rekt ^3by ^5SN7313 ^4Download ^;at ^:mpgh.net",*OpponenetsName);
-		Engine.ProcessCMD_(0, Buf);
-		OldKillCount = KillCount;
-	}
-
-}
-
 void Misc::Wrapper()
 {
 	Misc::Crosshair();
@@ -182,7 +159,7 @@ void Misc::VoteKickPlayerExploit()
 	const char* Name = GetPlayerName();
 	char Buffer[64];
 	sprintf_s(Buffer, "callvote kick %s", Name);
-	Engine.ProcessCMD_(0, Buffer);
+	Engine.AddReliableCommand_(0, Buffer);
 }
 
 void Misc::NoGun()
@@ -199,5 +176,4 @@ void Misc::NoGun()
 		*PosZ = 0;
 		*PosX = 0;
 	}
-
 }

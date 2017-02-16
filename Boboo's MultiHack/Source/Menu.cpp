@@ -20,7 +20,7 @@ void Menu::DrawMenu(int BasePosMenuX,int BasePosMenuY)
 
 void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 {
-	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, 1, ColorBlue);
+	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorBlue);
 	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25 , Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Cirlces:");
@@ -56,8 +56,8 @@ void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Shaders:");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::ShaderESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Triangles:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::TriangleESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Magic:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::MagicESPEnabled));
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Visible:");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
@@ -67,7 +67,7 @@ void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 
 void Menu::DrawAimbotOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
-	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, 1, ColorGreen);
+	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorGreen);
 	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Aimbone:");
@@ -91,7 +91,7 @@ void Menu::DrawAimbotOptions(int BasePosX, int BasePosY, int WidthX, int LengthY
 
 void Menu::DrawMiscOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
-	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, 1, ColorOrange);
+	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorOrange);
 	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "NoRecoil:");
@@ -109,8 +109,8 @@ void Menu::DrawMiscOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "NoSpread(DVAR):");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoSpreadEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Chat Spam");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::ChatSpamEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Ingame Console");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::IngameConsoleEnabled));
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "No Gun");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoGunEnabled));
@@ -118,7 +118,7 @@ void Menu::DrawMiscOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 
 void Menu::DrawUtilsOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
-	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, 1, ColorRed);
+	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorRed);
 	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
 
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Change Name");
@@ -165,7 +165,7 @@ void Menu::DrawMenuWrapper()
 
 void Menu::DrawTabHeader(char * TabName, int LeftUPX, int LeftUPY, int RightDownX, int RightDownY, vec4_t ColorTab, int * Shader, int Size, void * Font, vec4_t ColorText, vec4_t ColorBackground)
 {
-	Draw::DrawRectangleFilled(LeftUPX, LeftUPY, RightDownX - LeftUPX, RightDownY - LeftUPY, 1, ColorBackground);
+	Draw::DrawRectangleFilled(LeftUPX, LeftUPY, RightDownX - LeftUPX, RightDownY - LeftUPY, ColorBackground);
 	Draw::DrawRectangle(LeftUPX, LeftUPY, RightDownX, LeftUPY, RightDownX, RightDownY, LeftUPX, RightDownY, ColorTab, Shader, Size);
 	Draw::DrawTextMW3(LeftUPX + 2, RightDownY, Font, ColorText, TabName);
 }
@@ -244,9 +244,9 @@ void Menu::SwitchOnOrOff(int Key)
 			break;
 		case 11:
 			if (Key)
-				ESP::TriangleESPEnabled = true;
+				ESP::MagicESPEnabled = true;
 			else
-				ESP::TriangleESPEnabled = false;
+				ESP::MagicESPEnabled = false;
 			break;
 		case 12:
 			if (Key)
@@ -411,13 +411,12 @@ void Menu::SwitchOnOrOff(int Key)
 		case 5:
 			if (Key)
 			{
-				Misc::ChatSpamEnabled = true;
-				Engine.ProcessCMD_(0, "say DEBUG:ChatSpam enabled successfully");
+				Misc::IngameConsoleEnabled = true;
 				Sleep(100);
 			}
 			else
 			{
-				Misc::ChatSpamEnabled = false;
+				Misc::IngameConsoleEnabled = false;
 			}
 			break;
 		case 6:

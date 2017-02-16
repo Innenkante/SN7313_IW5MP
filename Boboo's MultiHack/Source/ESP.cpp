@@ -13,7 +13,7 @@ bool ESP::ThreeDBoxESPEnabled = false;
 bool ESP::WeaponESPEnabled = false; 
 bool ESP::SnaplineESPEnabled = false;
 bool ESP::ShaderESPEnabled = false;
-bool ESP::TriangleESPEnabled = false;
+bool ESP::MagicESPEnabled = false;
 bool ESP::VisibleESPEnabled = false;
 
 
@@ -30,9 +30,8 @@ void ESP::Wrapper()
 	WeaponESP();
 	SnaplineESP();
 	ShaderESP();
-	//need bools and place in menu
-	TriangleESP();
 	VisibleESP();
+	MagicESP();
 }
 
 void ESP::CirlceESP()
@@ -45,8 +44,6 @@ void ESP::CirlceESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
 	bool DeathMatch = false;
 
@@ -99,15 +96,7 @@ void ESP::NameESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -136,15 +125,7 @@ void ESP::SlotESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -174,15 +155,8 @@ void ESP::RankESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
 	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -211,15 +185,7 @@ void ESP::DistanceESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -234,7 +200,7 @@ void ESP::DistanceESP()
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Distance[1024];
 			float distance = Math::GetDistance(refdef->Origin, Vector3D(TagPos_head));
-			sprintf_s(buf_Distance, "^3 %f ", distance);
+			sprintf_s(buf_Distance, "^3 %fm", distance / 41.5);
 			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
 		}
 	}
@@ -249,15 +215,7 @@ void ESP::XUIDESP()
 	RefDef_T* refdef = (RefDef_T*)(REFDEFOFF);
 	CG_T* cg = (CG_T*)(CGOFF);
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	float* ViewX = (float*)0x0106389C;
-	float* ViewY = (float*)0x01063898;
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -740,65 +698,6 @@ void ESP::ShaderESP()
 	}
 }
 
-void ESP::TriangleESP() //TODO scaling it properly! => 
-{
-	if (!TriangleESPEnabled)
-		return;
-	Entity_T* Entity[18];
-	ClientInfo_T* Client[18];
-	CG_T* cg = (CG_T*)(CGOFF);
-	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-	CGS_T * CGS = (CGS_T*)(CGSOFF);
-	RefDef_T* RefDef = (RefDef_T*)(REFDEFOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
-
-	for (int i = 0; i < 18; i++)
-	{
-		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
-		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
-		if (Entity[i]->ClientNumber != cg->ClientNumber && Entity[i]->IsAlive & 0x01 && Entity[i]->Type == Entity_Type::Player && Entity[i]->Valid && Client[i]->Valid)
-		{
-			float TagPos_Head[3];
-			float Screen_Pos[2];
-
-			if (!Engine.GetTagPos(Entity[i], "j_head", TagPos_Head))
-				return;
-
-
-			float Distance = Math::GetDistance(RefDef->Origin, Vector3D(TagPos_Head));
-			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_Head, Screen_Pos);
-
-			if (DeathMatch)
-			{
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
-				return;
-			}
-			
-			if (Client[i]->Team != LocalClient->Team)
-			{
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorRed, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20,ColorRed,Engine.RegisterShader_("white"),3);
-			}
-			else
-			{
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0], Screen_Pos[1], Screen_Pos[0] - 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
-				Draw::DrawLine(Screen_Pos[0] - 20, Screen_Pos[1] - 20, Screen_Pos[0] + 20, Screen_Pos[1] - 20, ColorGreen, Engine.RegisterShader_("white"), 3);
-			}
-				
-		}
-
-	}
-}
-
 void ESP::VisibleESP()
 {
 	if (!VisibleESPEnabled)
@@ -809,12 +708,6 @@ void ESP::VisibleESP()
 	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
 	CGS_T * CGS = (CGS_T*)(CGSOFF);
 	RefDef_T* RefDef = (RefDef_T*)(REFDEFOFF);
-	bool DeathMatch = false;
-
-	if (CGS->GameType[0] == 'd' && CGS->GameType[1] == 'm')
-	{
-		DeathMatch = true;
-	}
 
 	for (int i = 0; i < 18; i++)
 	{
@@ -840,6 +733,50 @@ void ESP::VisibleESP()
 
 			Draw::DrawTextMW3(Screen_Pos[0] + 32, Screen_Pos[1] + 48, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, bufVisible);
 		}
-
 	}
+}
+
+void ESP::MagicESP()
+{
+	if (!MagicESPEnabled)
+		return;
+	Entity_T* Entity[18];
+	ClientInfo_T* Client[18];
+	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
+	CG_T* cg = (CG_T*)(CGOFF);
+	CGS_T* cgs = (CGS_T*)(CGSOFF);
+	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
+
+	for (int i = 0; i < 18; i++)
+	{
+		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
+		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
+	}
+
+	std::ofstream f("Dump.txt");
+	for (int i = 0; i < 18; i++)
+	{
+		if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
+		{
+			float TagPos_bone[3];
+			float Screen_pos[2];
+			if (!Engine.GetTagPos(Entity[i], "j_head", TagPos_bone))
+				continue;
+			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_pos);
+
+			//Not working till now :(
+			if (Math::GetDistance(Vector2D(RefDef->Width, RefDef->Height), Vector2D(Screen_pos)) > 50)
+				continue;
+
+			if (!Engine.IsVisible(i))
+				continue;
+				
+			
+			char databuf[1024];
+			sprintf_s(databuf, "^1%s :: %i \n^2%s :: %s \n^3%i :: %i \n^5%s", Client[i]->Name, Client[i]->ClientNumber, Client[i]->HeadName, Client[i]->BodyName, Client[i]->Team, Client[i]->Rank + 1,Engine.GetWeapon(Entity[i]->WeaponID)->ModelName);
+			//f << databuf;
+			Draw::DrawTextMW3(Screen_pos[0], Screen_pos[1], Engine.RegisterFont_(FONT_CONSOLE), ColorWhite, databuf);
+		}
+	}
+	f.close();
 }

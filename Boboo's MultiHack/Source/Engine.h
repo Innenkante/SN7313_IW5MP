@@ -9,9 +9,9 @@ public:
 	RegisterFont_t RegisterFont_ = (RegisterFont_t)REGISTERFONTOFF;
 	RegisterShader_t RegisterShader_ = (RegisterShader_t)REGISTERSHADEROFF;
 	GetScreenMatrix_t GetScreenMatrix_ = (GetScreenMatrix_t)SCREENMATRIXOFF;
-	World2Screen_t WorldToScreen_ = (World2Screen_t)0x004e5fc0;
+	World2Screen_t WorldToScreen_ = (World2Screen_t)0x004E5FC0;
 	RegisterTag_t RegisterTag_ = (RegisterTag_t)0x4922E0;
-	ProcessCMD ProcessCMD_ = (ProcessCMD)0x429920;
+	AddReliableCommand_t AddReliableCommand_ = (AddReliableCommand_t)0x4EE3A0;
 	bool GetTagPos(Entity_T* ent, char* tagname, float* out);
 	Weapon_t* GetWeapon(int WeaponID);
 	Trace_t TraceToTarget(float* TargetVector);
