@@ -16,7 +16,6 @@ public:
 	static bool SnaplineESPEnabled;
 	static bool ShaderESPEnabled;
 	static bool VisibleESPEnabled;
-	static bool MagicESPEnabled;
 	static void Wrapper();
 private:
 	static void CirlceESP();

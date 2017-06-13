@@ -11,7 +11,6 @@ public:
 	static bool NoGunEnabled;
 	static void NoRecoil();
 	static void NoSpread();
-	static void OwnBar();
 	static void FullBright();
 	static void Laser();
 	static void Crosshair();
@@ -26,7 +25,6 @@ public:
 	static void Wrapper();
 	static void VoteKickPlayerExploit();
 	static void NoGun();
-	static int OldKillCount;
 	static char XUID[16];
 private:
 

@@ -13,7 +13,6 @@ bool ESP::ThreeDBoxESPEnabled = false;
 bool ESP::WeaponESPEnabled = false; 
 bool ESP::SnaplineESPEnabled = false;
 bool ESP::ShaderESPEnabled = false;
-bool ESP::MagicESPEnabled = false;
 bool ESP::VisibleESPEnabled = false;
 
 

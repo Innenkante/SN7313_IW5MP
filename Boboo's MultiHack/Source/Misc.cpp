@@ -9,7 +9,6 @@ bool Misc::FullBrightEnabled = false;
 bool Misc::CrosshairEnabled = false;
 bool Misc::LaserEnabled = false;
 bool Misc::IngameConsoleEnabled = false;
-int Misc::OldKillCount = 0;
 bool Misc::NoGunEnabled = false;
 char Misc::XUID[] = {};
 
