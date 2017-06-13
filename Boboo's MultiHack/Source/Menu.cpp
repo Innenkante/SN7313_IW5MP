@@ -56,11 +56,8 @@ void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Shaders:");
 	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::ShaderESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Magic:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::MagicESPEnabled));
-
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Visible:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 265, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Visible:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
 	
 
 }
@@ -243,12 +240,6 @@ void Menu::SwitchOnOrOff(int Key)
 				ESP::ShaderESPEnabled = false;
 			break;
 		case 11:
-			if (Key)
-				ESP::MagicESPEnabled = true;
-			else
-				ESP::MagicESPEnabled = false;
-			break;
-		case 12:
 			if (Key)
 				ESP::VisibleESPEnabled = true;
 			else

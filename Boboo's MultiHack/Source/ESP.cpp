@@ -31,7 +31,6 @@ void ESP::Wrapper()
 	SnaplineESP();
 	ShaderESP();
 	VisibleESP();
-	MagicESP();
 }
 
 void ESP::CirlceESP()
@@ -734,49 +733,4 @@ void ESP::VisibleESP()
 			Draw::DrawTextMW3(Screen_Pos[0] + 32, Screen_Pos[1] + 48, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, bufVisible);
 		}
 	}
-}
-
-void ESP::MagicESP()
-{
-	if (!MagicESPEnabled)
-		return;
-	Entity_T* Entity[18];
-	ClientInfo_T* Client[18];
-	RefDef_T* RefDef = (RefDef_T*)REFDEFOFF;
-	CG_T* cg = (CG_T*)(CGOFF);
-	CGS_T* cgs = (CGS_T*)(CGSOFF);
-	ClientInfo_T* LocalClient = (ClientInfo_T*)(CLIENTOFF + (cg->ClientNumber * CLIENTSIZE));
-
-	for (int i = 0; i < 18; i++)
-	{
-		Entity[i] = (Entity_T*)(ENTITYOFF + (i * ENTITYSIZE));
-		Client[i] = (ClientInfo_T*)(CLIENTOFF + (i * CLIENTSIZE));
-	}
-
-	std::ofstream f("Dump.txt");
-	for (int i = 0; i < 18; i++)
-	{
-		if (Entity[i]->Valid && Entity[i]->IsAlive & 0x01 && Entity[i]->ClientNumber != cg->ClientNumber)
-		{
-			float TagPos_bone[3];
-			float Screen_pos[2];
-			if (!Engine.GetTagPos(Entity[i], "j_head", TagPos_bone))
-				continue;
-			Engine.WorldToScreen_(0x0, Engine.GetScreenMatrix_(), TagPos_bone, Screen_pos);
-
-			//Not working till now :(
-			if (Math::GetDistance(Vector2D(RefDef->Width, RefDef->Height), Vector2D(Screen_pos)) > 50)
-				continue;
-
-			if (!Engine.IsVisible(i))
-				continue;
-				
-			
-			char databuf[1024];
-			sprintf_s(databuf, "^1%s :: %i \n^2%s :: %s \n^3%i :: %i \n^5%s", Client[i]->Name, Client[i]->ClientNumber, Client[i]->HeadName, Client[i]->BodyName, Client[i]->Team, Client[i]->Rank + 1,Engine.GetWeapon(Entity[i]->WeaponID)->ModelName);
-			//f << databuf;
-			Draw::DrawTextMW3(Screen_pos[0], Screen_pos[1], Engine.RegisterFont_(FONT_CONSOLE), ColorWhite, databuf);
-		}
-	}
-	f.close();
 }

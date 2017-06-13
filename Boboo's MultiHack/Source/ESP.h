@@ -31,5 +31,4 @@ private:
 	static void SnaplineESP();
 	static void ShaderESP();
 	static void VisibleESP();
-	static void MagicESP();
 };

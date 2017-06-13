@@ -78,7 +78,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 		{
 			if (Menu::CurrentActiveMenu == Menu::ESPMenuTab)
 			{
-				if (Menu::OptionNumber != 12)
+				if (Menu::OptionNumber != 11)
 					Menu::OptionNumber++;
 				else
 					Menu::OptionNumber = 0;
@@ -115,7 +115,7 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 				if (Menu::OptionNumber != 0)
 					Menu::OptionNumber--;
 				else
-					Menu::OptionNumber = 12;
+					Menu::OptionNumber = 11;
 			}
 			if (Menu::CurrentActiveMenu == Menu::AimbotMenuTab)
 			{
@@ -149,6 +149,11 @@ DWORD WINAPI KeyBoardHook(LPVOID lpParam)
 		if (GetAsyncKeyState(VK_RIGHT))
 		{
 			Menu::SwitchOnOrOff(1);
+		}
+		if (GetAsyncKeyState(VK_BACK))
+		{
+			//Misc::OwnBar();
+			Sleep(500);
 		}
 	}
 	Sleep(10);
