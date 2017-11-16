@@ -32,44 +32,6 @@ void Misc::NoSpread()
 
 }
 
-void(*R_WeaponSpread)(CG_T* cg, int weapon, float*BaseSpread, float*MaxSpread) = (void(__cdecl*)(CG_T*, int, float*, float*))0x4E1130;//0x435D90;
-
-int(__cdecl* R_GetCurrentWeapon)(CG_T*) = (int(__cdecl*)(CG_T*))0x49DFF0;//44C220;
-
-void GetRandomSpread( float* flSpreadRight,float* flSpreadUp ) 
-{ 
-	DWORD dwCall = 0x5E0BC0;//0x5C8D00; 
-
-	int iSeed = *(int*)0x96A25C - 1;//A4758C-1;
-
-	int iSpreadSeed = 214013 * (214013 * (214013 * (214013 * iSeed + 2531011) + 2531011) + 2531011) + 2531011;
-
-	__asm 
-	{ 
-		lea eax, dword ptr ds: [ flSpreadUp ]; 
-		push [ eax ];
-		lea ecx, dword ptr ds: [ flSpreadRight ]; 
-		push [ ecx ];
-		lea esi, dword ptr ds:[ iSpreadSeed ];
-		call dword ptr ds:[ dwCall ]; 
-		add esp, 0x8 
-	} 
-} 
-void GetWeaponSpread( float*Spread ) 
-{ 
-	float SpreadMultiplier = *(float*)0xA03950;//0xAE0CC8; 
-
-	float MaxSpread = 0.0f; 
-	float BaseSpread = 0.0f; 
-
-	int iLocalWeapon = R_GetCurrentWeapon( ((CG_T*) (CGOFF))); 
-
-	R_WeaponSpread(  ((CG_T*) (CGOFF)), iLocalWeapon, &BaseSpread, &MaxSpread ); 
-
-	*Spread = BaseSpread + ( ( MaxSpread - BaseSpread ) * SpreadMultiplier / 255.0f ); 
-}
-
-
 void Misc::FullBright()
 {
 	int* fullbright = (int*)FULLBRIGHTOFF;

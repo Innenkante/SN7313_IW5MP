@@ -16,6 +16,20 @@ bool ESP::ShaderESPEnabled = false;
 bool ESP::VisibleESPEnabled = false;
 
 
+std::map<char*, void*> font_map_esp;
+
+void ESP::register_fonts()
+{
+	font_map_esp[FONT_CONSOLE] = Engine.RegisterFont_(FONT_CONSOLE);
+	font_map_esp[FONT_SMALL] = Engine.RegisterFont_(FONT_SMALL);
+	font_map_esp[FONT_SMALL_DEV] = Engine.RegisterFont_(FONT_SMALL_DEV);
+}
+
+std::map<char*, int*> shader_map_esp;
+void ESP::register_shaders()
+{
+	shader_map_esp["white"] = Engine.RegisterShader_("white");
+}
 void ESP::Wrapper()
 {
 	CirlceESP();
@@ -109,7 +123,7 @@ void ESP::NameESP()
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Name[1024];
 			sprintf_s(buf_Name, "^3 %s ", Clients[i]->Name);
-			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + -5, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Name); //Name 
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + -5, font_map_esp[FONT_SMALL_DEV], ColorWhite, buf_Name); //Name 
 		}
 	}
 }
@@ -138,7 +152,7 @@ void ESP::SlotESP()
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Slot[1024];
 			sprintf_s(buf_Slot, "^3 %d ", Clients[i]->ClientNumber);
-			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Slot); 
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 8, font_map_esp[FONT_SMALL_DEV], ColorWhite, buf_Slot); 
 		}
 	}
 }
@@ -169,7 +183,7 @@ void ESP::RankESP()
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_head, Screen_head);
 			char buf_Rank[1024];
 			sprintf_s(buf_Rank, "^3 %d ", Clients[i]->Rank);
-			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Rank);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 18, font_map_esp[FONT_SMALL_DEV], ColorWhite, buf_Rank);
 		}
 	}
 }
@@ -199,7 +213,7 @@ void ESP::DistanceESP()
 			char buf_Distance[1024];
 			float distance = Math::GetDistance(refdef->Origin, Vector3D(TagPos_head));
 			sprintf_s(buf_Distance, "^3 %fm", distance / 41.5);
-			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_Distance);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 28, font_map_esp[FONT_SMALL_DEV], ColorWhite, buf_Distance);
 		}
 	}
 }
@@ -229,7 +243,7 @@ void ESP::XUIDESP()
 			char buf_XUID[1024];
 			long GUID = Engine.GetXUID(Clients[i]->ClientNumber);
 			sprintf_s(buf_XUID, "^3 %d ", GUID);
-			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, buf_XUID);
+			Draw::DrawTextMW3(Screen_head[0] + 32, Screen_head[1] + 38, font_map_esp[FONT_SMALL_DEV], ColorWhite, buf_XUID);
 		}
 	}
 }
@@ -375,96 +389,96 @@ void ESP::BoneESP()
 			//Pelvis
 			Engine.WorldToScreen_(0x0, Matrix, TagPos_Pelvis, Screen_Pelvis);
 
-			Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5); //The Peniiiis
+			Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, shader_map_esp["white"], 5); //The Peniiiis
 
 			if (DeathMatch)
 			{
-				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Left Leg
-				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Right Arm
-				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Left Arm
-				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Back bone
-				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Head
-				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Neck -> Backbone connection
-				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, Engine.RegisterShader_("white"), 5);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_Pelvis[0], Screen_Pelvis[1], Screen_Pelvis[0] + 1, Screen_Pelvis[1] + 1, ColorOrange, shader_map_esp["white"], 5);
 
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
 			{
 				//Right leg
-				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Left Leg
-				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Right Arm
-				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Left Arm
-				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Back bone
-				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Head
-				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorGreen, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorGreen, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorGreen, shader_map_esp["white"], 2);
 
 				//Neck -> Backbone connection
-				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorGreen, shader_map_esp["white"], 2);
 			}
 			else
 			{
 				//Right leg
-				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_r[0], Screen_hip_r[1], Screen_knee_r[0], Screen_knee_r[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_r[0], Screen_knee_r[1], Screen_ankle_r[0], Screen_ankle_r[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Left Leg
-				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_hip_l[0], Screen_hip_l[1], Screen_knee_l[0], Screen_knee_l[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_knee_l[0], Screen_knee_l[1], Screen_ankle_l[0], Screen_ankle_l[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Right Arm
-				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_r[0], Screen_shoulder_r[1], Screen_elbow_r[0], Screen_elbow_r[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_r[0], Screen_elbow_r[1], Screen_wrist_r[0], Screen_wrist_r[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Left Arm
-				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_shoulder_l[0], Screen_shoulder_l[1], Screen_elbow_l[0], Screen_elbow_l[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_elbow_l[0], Screen_elbow_l[1], Screen_wrist_l[0], Screen_wrist_l[1], ColorRed, shader_map_esp["white"], 2);
 				
 				//Back bone
-				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_spineupper[0], Screen_spineupper[1], Screen_mainroot[0], Screen_mainroot[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_mainroot[0], Screen_mainroot[1], Screen_spinelower[0], Screen_spinelower[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Head
-				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, Engine.RegisterShader_("white"), 2);
-				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_helmet[0], Screen_helmet[1], Screen_head[0], Screen_head[1], ColorRed, shader_map_esp["white"], 2);
+				Draw::DrawLine(Screen_head[0], Screen_head[1], Screen_neck[0], Screen_neck[1], ColorRed, shader_map_esp["white"], 2);
 
 				//Neck -> Backbone connection
-				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(Screen_neck[0], Screen_neck[1], Screen_spineupper[0], Screen_spineupper[1], ColorRed, shader_map_esp["white"], 2);
 			}
 		}
 	}
@@ -495,13 +509,13 @@ void ESP::ThreeDBoxESP()
 		{
 			if (DeathMatch)
 			{
-				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, shader_map_esp["white"]);
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
-				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorGreen, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorGreen, shader_map_esp["white"]);
 			else
-				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, Engine.RegisterShader_("white"));
+				Draw::Draw3DBox(Entity[i]->Origin, 40, 80, ColorRed, shader_map_esp["white"]);
 		}
 	}
 }
@@ -642,13 +656,13 @@ void ESP::SnaplineESP()
 
 			if (DeathMatch)
 			{
-				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, shader_map_esp["white"], 2);
 				continue;
 			}
 			if (Client[i]->Team == LocalClient->Team)
-				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorGreen, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorGreen, shader_map_esp["white"], 2);
 			else
-				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, Engine.RegisterShader_("white"), 2);
+				Draw::DrawLine(RefDef->Width / 2, RefDef->Height, ScreenPos[0], ScreenPos[1], ColorRed, shader_map_esp["white"], 2);
 		}
 
 	}
@@ -729,7 +743,7 @@ void ESP::VisibleESP()
 			else
 				sprintf_s(bufVisible, "Visible:^1No");
 
-			Draw::DrawTextMW3(Screen_Pos[0] + 32, Screen_Pos[1] + 48, Engine.RegisterFont_(FONT_SMALL_DEV), ColorWhite, bufVisible);
+			Draw::DrawTextMW3(Screen_Pos[0] + 32, Screen_Pos[1] + 48, font_map_esp[FONT_SMALL_DEV], ColorWhite, bufVisible);
 		}
 	}
 }

@@ -1,5 +1,5 @@
-#include "Menu.h"
 #include "stdafx.h"
+#include "Menu.h"
 
 #include "LinkingFix.h"
 
@@ -9,55 +9,69 @@ int Menu:: BasePosY;
 int Menu:: OptionNumber;
 int Menu:: CurrentActiveMenu;
 
+std::map<char*, void*> font_map_menu;
+
+void Menu::register_fonts()
+{
+	font_map_menu[FONT_CONSOLE] = Engine.RegisterFont_(FONT_CONSOLE);
+	font_map_menu[FONT_SMALL] = Engine.RegisterFont_(FONT_SMALL);
+}
+
+std::map<char*, int*> shader_map_menu;
+void Menu::register_shaders()
+{
+	shader_map_menu["white"] = Engine.RegisterShader_("white");
+}
+
 
 void Menu::DrawMenu(int BasePosMenuX,int BasePosMenuY)
 {
-	DrawTabHeader("ESP", BasePosMenuX, BasePosMenuY, BasePosMenuX + 40, BasePosMenuY + 30, ColorWhite, Engine.RegisterShader_("white"), 3, Engine.RegisterFont_(FONT_SMALL), ColorBlack, ColorBlue); //Size X = 40
-	DrawTabHeader("Aimbot", BasePosMenuX + 40, BasePosMenuY, BasePosMenuX + 40 + 65, BasePosMenuY + 30, ColorWhite, Engine.RegisterShader_("white"), 3, Engine.RegisterFont_(FONT_SMALL), ColorBlack, ColorGreen); //Size X = 65
-	DrawTabHeader("Misc", BasePosMenuX + 40 + 65, BasePosMenuY, BasePosMenuX + 40 + 65 + 45, BasePosMenuY + 30, ColorWhite, Engine.RegisterShader_("white"), 3, Engine.RegisterFont_(FONT_SMALL), ColorBlack, ColorOrange); //Size X = 45
-	DrawTabHeader("Utils", BasePosMenuX + 40 + 65 + 45, BasePosMenuY, BasePosMenuX + 40 + 65 + 45 + 50, BasePosMenuY + 30, ColorWhite, Engine.RegisterShader_("white"), 3, Engine.RegisterFont_(FONT_SMALL), ColorBlack, ColorRed); //Size X = 50
+	DrawTabHeader("ESP", BasePosMenuX, BasePosMenuY, BasePosMenuX + 40, BasePosMenuY + 30, ColorWhite, shader_map_menu["white"], 3, font_map_menu[FONT_SMALL], ColorBlack, ColorBlue); //Size X = 40
+	DrawTabHeader("Aimbot", BasePosMenuX + 40, BasePosMenuY, BasePosMenuX + 40 + 65, BasePosMenuY + 30, ColorWhite, shader_map_menu["white"], 3, font_map_menu[FONT_SMALL], ColorBlack, ColorGreen); //Size X = 65
+	DrawTabHeader("Misc", BasePosMenuX + 40 + 65, BasePosMenuY, BasePosMenuX + 40 + 65 + 45, BasePosMenuY + 30, ColorWhite, shader_map_menu["white"], 3, font_map_menu[FONT_SMALL], ColorBlack, ColorOrange); //Size X = 45
+	DrawTabHeader("Utils", BasePosMenuX + 40 + 65 + 45, BasePosMenuY, BasePosMenuX + 40 + 65 + 45 + 50, BasePosMenuY + 30, ColorWhite, shader_map_menu["white"], 3, font_map_menu[FONT_SMALL], ColorBlack, ColorRed); //Size X = 50
 }
 
 void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 {
 	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorBlue);
-	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
+	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, shader_map_menu["white"], 3);
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25 , Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Cirlces:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::CircleESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25 , font_map_menu[FONT_CONSOLE], ColorBlack, "Cirlces:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::CircleESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Bones:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::BoneESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, "Bones:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::BoneESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Names:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::NameESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, "Names:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::NameESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Slot:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::SlotESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, "Slot:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::SlotESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Rank:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::RankESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, "Rank:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::RankESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Distance:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::DistanceESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, "Distance:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::DistanceESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "XUID:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::XUIDESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, font_map_menu[FONT_CONSOLE], ColorBlack, "XUID:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::XUIDESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 165, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "3DBox:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 165, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::ThreeDBoxESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 165, font_map_menu[FONT_CONSOLE], ColorBlack, "3DBox:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 165, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::ThreeDBoxESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 185, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Weapons:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 185, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::WeaponESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 185, font_map_menu[FONT_CONSOLE], ColorBlack, "Weapons:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 185, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::WeaponESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 205, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Snaplines:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 205, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::SnaplineESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 205, font_map_menu[FONT_CONSOLE], ColorBlack, "Snaplines:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 205, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::SnaplineESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Shaders:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::ShaderESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, font_map_menu[FONT_CONSOLE], ColorBlack, "Shaders:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 225, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::ShaderESPEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Visible:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, font_map_menu[FONT_CONSOLE], ColorBlack, "Visible:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 245, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(ESP::VisibleESPEnabled));
 	
 
 }
@@ -65,71 +79,71 @@ void Menu::DrawESPOptions(int BasePosX, int BasePosY,int WidthX,int LengthY)
 void Menu::DrawAimbotOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
 	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorGreen);
-	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
+	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, shader_map_menu["white"], 3);
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Aimbone:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Aimbot::Bones_Collection[Aimbot::AimboneID]);
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, "Aimbone:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, Aimbot::Bones_Collection[Aimbot::AimboneID]);
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "AimField:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetAimField());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, "AimField:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetAimField());
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Min. TraceValue:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetMinTraceValue());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, "Min. TraceValue:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetMinTraceValue());
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Closest Aimbot:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Aimbot::ClosestAimbotEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, "Closest Aimbot:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Aimbot::ClosestAimbotEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Aim Assist:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Aimbot::AimAssistEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, "Aim Assist:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Aimbot::AimAssistEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Trace Aimbot:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Aimbot::BestTraceAimbotEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, "Trace Aimbot:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Aimbot::BestTraceAimbotEnabled));
 }
 
 void Menu::DrawMiscOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
 	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorOrange);
-	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
+	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, shader_map_menu["white"], 3);
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "NoRecoil:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoRecoilEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, "NoRecoil:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::NoRecoilEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "FullBright:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::FullBrightEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, "FullBright:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::FullBrightEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Laser:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::LaserEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, "Laser:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::LaserEnabled));
 	
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Crosshair:");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::CrosshairEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, "Crosshair:");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::CrosshairEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "NoSpread(DVAR):");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoSpreadEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, "NoSpread(DVAR):");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::NoSpreadEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Ingame Console");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::IngameConsoleEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, "Ingame Console");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 125, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::IngameConsoleEnabled));
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "No Gun");
-	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Utils::GetStateAsWord(Misc::NoGunEnabled));
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, font_map_menu[FONT_CONSOLE], ColorBlack, "No Gun");
+	Draw::DrawTextMW3(BasePosX + 150, BasePosY + 145, font_map_menu[FONT_CONSOLE], ColorBlack, Utils::GetStateAsWord(Misc::NoGunEnabled));
 }
 
 void Menu::DrawUtilsOptions(int BasePosX, int BasePosY, int WidthX, int LengthY)
 {
 	Draw::DrawRectangleFilled(BasePosX, BasePosY, WidthX, LengthY, ColorRed);
-	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, Engine.RegisterShader_("white"), 3);
+	Draw::DrawRectangle(BasePosX, BasePosY, BasePosX + WidthX, BasePosY, BasePosX + WidthX, BasePosY + LengthY, BasePosX, BasePosY + LengthY, ColorWhite, shader_map_menu["white"], 3);
 
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Change Name");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Unlock Classes");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Force Juggernaut");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Change Team");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Votekick Exploit");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 25, font_map_menu[FONT_CONSOLE], ColorBlack, "Change Name");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 45, font_map_menu[FONT_CONSOLE], ColorBlack, "Unlock Classes");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 65, font_map_menu[FONT_CONSOLE], ColorBlack, "Force Juggernaut");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 85, font_map_menu[FONT_CONSOLE], ColorBlack, "Change Team");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 105, font_map_menu[FONT_CONSOLE], ColorBlack, "Votekick Exploit");
 	//125 -> Leaving one line space
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "User:");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 165, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Misc::GetPlayerName());
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 185, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Misc::GetPlayerXUID());
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 205, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, "Server:");
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Misc::GetServerName());
-	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, Engine.RegisterFont_(FONT_CONSOLE), ColorBlack, Misc::GetServerIP());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 145, font_map_menu[FONT_CONSOLE], ColorBlack, "User:");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 165, font_map_menu[FONT_CONSOLE], ColorBlack, Misc::GetPlayerName());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 185, font_map_menu[FONT_CONSOLE], ColorBlack, Misc::GetPlayerXUID());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 205, font_map_menu[FONT_CONSOLE], ColorBlack, "Server:");
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 225, font_map_menu[FONT_CONSOLE], ColorBlack, Misc::GetServerName());
+	Draw::DrawTextMW3(BasePosX + 2, BasePosY + 245, font_map_menu[FONT_CONSOLE], ColorBlack, Misc::GetServerIP());
 
 
 }
@@ -157,8 +171,6 @@ void Menu::DrawMenuWrapper()
 	}
 	return;
 }
-
-
 
 void Menu::DrawTabHeader(char * TabName, int LeftUPX, int LeftUPY, int RightDownX, int RightDownY, vec4_t ColorTab, int * Shader, int Size, void * Font, vec4_t ColorText, vec4_t ColorBackground)
 {

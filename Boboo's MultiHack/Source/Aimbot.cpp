@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Aimbot.h"
 #include "LinkingFix.h"
+#include "../NoSpread.h"
 
 
 bool Aimbot::ClosestAimbotEnabled = false;
@@ -277,6 +278,7 @@ void Aimbot::BestTraceAimbot(float MinTraceVal)
 
 	*ViewX += Angles.x;
 	*ViewY += Angles.y;
+	//no_spread::ApplySpread();
 
 	Weapon_t* CurrentWeapon = Engine.GetWeapon(Entity[cg->ClientNumber]->WeaponID);
 	if (strstr(CurrentWeapon->ModelName, "msr") || strstr(CurrentWeapon->ModelName, "l96a1"))

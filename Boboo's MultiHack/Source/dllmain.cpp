@@ -4,6 +4,12 @@
 
 void Init()
 {
+
+	Menu::register_fonts();
+	Menu::register_shaders();
+	ESP::register_fonts();
+	ESP::register_shaders();
+
 	Menu::CurrentActiveMenu = Menu::ESPMenuTab;
 	Menu::BasePosX = 100;
 	Menu::BasePosY = 100;
@@ -202,6 +208,8 @@ __declspec(naked) void hkDraw2D()
 }
 
 #pragma endregion
+
+
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDll, DWORD Reason, LPVOID Reserved)

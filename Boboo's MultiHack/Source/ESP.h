@@ -16,6 +16,8 @@ public:
 	static bool SnaplineESPEnabled;
 	static bool ShaderESPEnabled;
 	static bool VisibleESPEnabled;
+	static void register_fonts();
+	static void register_shaders();
 	static void Wrapper();
 private:
 	static void CirlceESP();

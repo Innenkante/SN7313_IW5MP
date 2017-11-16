@@ -15,7 +15,9 @@ public:
 	static int BasePosX;
 	static int BasePosY;
 	static int OptionNumber;
-	
+
+	static void register_fonts();
+	static void register_shaders();
 private:
 	static void DrawTabHeader(char * TabName, int LeftUPX, int LeftUPY, int RightDownX, int RightDownY, vec4_t ColorTab, int * Shader, int Size, void * Font, vec4_t ColorText, vec4_t ColorBackground);
 	static void DrawMenu(int BasePosMenuX, int MenuBasePosY);
