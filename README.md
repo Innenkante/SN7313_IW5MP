@@ -55,4 +55,9 @@ sh*tty unfinished code, but works.
 * No nospread
 * Unfinished
 
-
+## Thanks to:
+ * Marty
+ * Kenshin13
+ * MPGH
+ * UnknownCheats
+ * The Internet
